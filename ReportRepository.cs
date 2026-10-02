@@ -88,10 +88,26 @@ public class ReportRepository(IDbConnectionFactory factory, IOptions<SurveyOptio
 
         // Niveles de riesgo (Anexo III): suma de ValorRespuesta por empleado
         var scores = (await c.QueryAsync<int>(
-            $@"SELECT ISNULL(SUM(CAST(r.ValorRespuesta AS int)), 0)
-               FROM SurveyResults r {wd} AND r.Anexo = @code
-               GROUP BY r.NumeroReloj", new { desde = f.Desde, hasta = f.Hasta, code = O.AnexoIIICode })).ToList();
-
+    $@"SELECT ISNULL(SUM(CASE r.IdentificadorRespuesta
+                WHEN 'Siempre'       THEN rv.ValorSiempre
+                WHEN 'Casi siempre'  THEN rv.ValorCasiSiempre
+                WHEN 'Algunas veces' THEN rv.ValorAlgunasVeces
+                WHEN 'Casi nunca'    THEN rv.ValorCasiNunca
+                WHEN 'Nunca'         THEN rv.ValorNunca
+                ELSE 0 END), 0)
+       FROM SurveyResults r
+       JOIN SurveyQuestions q
+            ON CAST(q.id AS nvarchar(50)) = CAST(r.IdentificadorPregunta AS nvarchar(50))
+           AND q.Anexo = @qanexo
+       JOIN (SELECT IdentificadorPregunta,
+                    MAX(ValorSiempre) AS ValorSiempre, MAX(ValorCasiSiempre) AS ValorCasiSiempre,
+                    MAX(ValorAlgunasVeces) AS ValorAlgunasVeces, MAX(ValorCasiNunca) AS ValorCasiNunca,
+                    MAX(ValorNunca) AS ValorNunca
+             FROM ResponseValues GROUP BY IdentificadorPregunta) rv
+            ON rv.IdentificadorPregunta = q.Identificador
+       {wd} AND r.Anexo = @code
+       GROUP BY r.NumeroReloj",
+    new { desde = f.Desde, hasta = f.Hasta, code = O.AnexoIIICode, qanexo = O.QuestionsAnexoFilter })).ToList();
         if (scores.Any(s => s > 0))
         {
             var t = O.Risk;
