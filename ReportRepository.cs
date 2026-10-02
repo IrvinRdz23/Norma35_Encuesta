@@ -9,7 +9,8 @@ namespace MahleSurvey.Services;
 public class ReportRepository(IDbConnectionFactory factory, IOptions<SurveyOptions> options, SurveyRepository surveys)
 {
     private SurveyOptions O => options.Value;
-    private const string Fecha = "TRY_CONVERT(datetime2, r.FechaActualizacion)";
+   private const string Fecha =
+    "(CASE WHEN ISDATE(r.FechaActualizacion) = 1 THEN CONVERT(datetime, r.FechaActualizacion, 121) END)";
 
     private static string Where(bool withAnexo = true) =>
         "WHERE 1 = 1 " +
