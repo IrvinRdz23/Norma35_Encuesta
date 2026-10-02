@@ -9,8 +9,10 @@ namespace MahleSurvey.Services;
 public class ReportRepository(IDbConnectionFactory factory, IOptions<SurveyOptions> options, SurveyRepository surveys)
 {
     private SurveyOptions O => options.Value;
-   private const string Fecha =
-    "(CASE WHEN ISDATE(r.FechaActualizacion) = 1 THEN CONVERT(datetime, r.FechaActualizacion, 121) END)";
+
+    // Compatible con SQL Server < 2012 (sin TRY_CONVERT)
+    private const string Fecha =
+        "(CASE WHEN ISDATE(r.FechaActualizacion) = 1 THEN CONVERT(datetime, r.FechaActualizacion, 121) END)";
 
     private static string Where(bool withAnexo = true) =>
         "WHERE 1 = 1 " +
@@ -84,40 +86,12 @@ public class ReportRepository(IDbConnectionFactory factory, IOptions<SurveyOptio
             .Select(l => new LabelCount { Etiqueta = l, Valor = global[l] }).ToList();
         d.Preguntas = perQ.Values.OrderBy(x => x.Anexo).ThenBy(x => x.Numero).ToList();
 
-        var pd = new { desde = f.Desde, hasta = f.Hasta };
-        var wd = Where(false);
-
-        // Niveles de riesgo (Anexo III): suma de ValorRespuesta por empleado
-        var scores = (await c.QueryAsync<int>(
-    $@"SELECT ISNULL(SUM(CASE r.IdentificadorRespuesta
-                WHEN 'Siempre'       THEN rv.ValorSiempre
-                WHEN 'Casi siempre'  THEN rv.ValorCasiSiempre
-                WHEN 'Algunas veces' THEN rv.ValorAlgunasVeces
-                WHEN 'Casi nunca'    THEN rv.ValorCasiNunca
-                WHEN 'Nunca'         THEN rv.ValorNunca
-                ELSE 0 END), 0)
-       FROM SurveyResults r
-       JOIN SurveyQuestions q
-            ON CAST(q.id AS nvarchar(50)) = CAST(r.IdentificadorPregunta AS nvarchar(50))
-           AND q.Anexo = @qanexo
-       JOIN (SELECT IdentificadorPregunta,
-                    MAX(ValorSiempre) AS ValorSiempre, MAX(ValorCasiSiempre) AS ValorCasiSiempre,
-                    MAX(ValorAlgunasVeces) AS ValorAlgunasVeces, MAX(ValorCasiNunca) AS ValorCasiNunca,
-                    MAX(ValorNunca) AS ValorNunca
-             FROM ResponseValues GROUP BY IdentificadorPregunta) rv
-            ON rv.IdentificadorPregunta = q.Identificador
-       {wd} AND r.Anexo = @code
-       GROUP BY r.NumeroReloj",
-    new { desde = f.Desde, hasta = f.Hasta, code = O.AnexoIIICode, qanexo = O.QuestionsAnexoFilter })).ToList();
-        if (scores.Any(s => s > 0))
-        {
-            var t = O.Risk;
-            string Level(int s) => s < t.Bajo ? "Nulo" : s < t.Medio ? "Bajo" : s < t.Alto ? "Medio" : s < t.MuyAlto ? "Alto" : "Muy alto";
-            d.Riesgo = new[] { "Nulo", "Bajo", "Medio", "Alto", "Muy alto" }
-                .Select(l => new LabelCount { Etiqueta = l, Valor = scores.Count(s => Level(s) == l) }).ToList();
-        }
+        // Niveles de riesgo (Anexo III): deshabilitado hasta confirmar de dónde salen los puntos
+        // (no existen ResponseValues ni SurveyResults.ValorRespuesta en esta BD). d.Riesgo queda vacío
+        // y la gráfica y la hoja de Excel correspondientes se ocultan solas.
 
         // Anexo I: sólo agregados (dato sensible, no se listan personas)
+        var wd = Where(false);
         var qList = string.Join(",", Enumerable.Range(1, 6).Select(i => $"'question[{i}]'"));
         var a1 = await c.QuerySingleAsync<AnexoISummary>(
             $@"SELECT COUNT(DISTINCT CASE WHEN r.IdentificadorPregunta = 'question[1]'
