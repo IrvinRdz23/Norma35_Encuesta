@@ -1,0 +1,3546 @@
+HOLA!
+Oye, necesito re hacer un Proyecto todo mal hecho de net framework, a net core 8.0 si. Es una pagina para contestar encuestas. La parte de las enceustas/anexos esta bien, pero la parte de generar reports (excel y graficas) no. Entonces quiero migrar todo para primero que nada, todo funcione, y Segundo, que todo sea muchisimo mas bonito, estetico y professional. 
+
+Te paso los codigos, para pasar todo a MVC, con razor y todo, si?
+
+
+BundleConfig:
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Optimization;
+using System.Web.UI;
+
+namespace MAHLESurvey
+{
+    public class BundleConfig
+    {
+        // For more information on Bundling, visit https://go.microsoft.com/fwlink/?LinkID=303951
+        public static void RegisterBundles(BundleCollection bundles)
+        {
+            bundles.Add(new ScriptBundle("~/bundles/WebFormsJs").Include(
+                            "~/Scripts/WebForms/WebForms.js",
+                            "~/Scripts/WebForms/WebUIValidation.js",
+                            "~/Scripts/WebForms/MenuStandards.js",
+                            "~/Scripts/WebForms/Focus.js",
+                            "~/Scripts/WebForms/GridView.js",
+                            "~/Scripts/WebForms/DetailsView.js",
+                            "~/Scripts/WebForms/TreeView.js",
+                            "~/Scripts/WebForms/WebParts.js"));
+
+            // Order is very important for these files to work, they have explicit dependencies
+            bundles.Add(new ScriptBundle("~/bundles/MsAjaxJs").Include(
+                    "~/Scripts/WebForms/MsAjax/MicrosoftAjax.js",
+                    "~/Scripts/WebForms/MsAjax/MicrosoftAjaxApplicationServices.js",
+                    "~/Scripts/WebForms/MsAjax/MicrosoftAjaxTimer.js",
+                    "~/Scripts/WebForms/MsAjax/MicrosoftAjaxWebForms.js"));
+
+            // Use the Development version of Modernizr to develop with and learn from. Then, when you’re
+            // ready for production, use the build tool at https://modernizr.com to pick only the tests you need
+            bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
+                            "~/Scripts/modernizr-*"));
+        }
+    }
+}
+
+RouteConfig:
+
+using System;
+using System.Collections.Generic;
+using System.Web;
+using System.Web.Routing;
+using Microsoft.AspNet.FriendlyUrls;
+
+namespace MAHLESurvey
+{
+    public static class RouteConfig
+    {
+        public static void RegisterRoutes(RouteCollection routes)
+        {
+            var settings = new FriendlyUrlSettings();
+            settings.AutoRedirectMode = RedirectMode.Permanent;
+            routes.EnableFriendlyUrls(settings);
+        }
+    }
+}
+
+
+ExceptionUtility:
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.IO;
+
+namespace MAHLESurvey.Logic
+{
+    // Create our own utility for exceptions
+    public sealed class ExceptionUtility
+    {
+        // All methods are static, so this can be private
+        private ExceptionUtility()
+        { }
+
+        // Log an Exception
+        public static void LogException(Exception exc, string source)
+        {
+            try
+            {
+                // Include logic for logging exceptions
+                // Get the absolute path to the log file
+                string logFile = "~/App_Data/ErrorLog.txt";
+            logFile = HttpContext.Current.Server.MapPath(logFile);
+
+            // Open the log file for append and write the log
+            StreamWriter sw = new StreamWriter(logFile, true);
+            sw.WriteLine("********** {0} **********", DateTime.Now);
+            if (exc.InnerException != null)
+            {
+                sw.Write("Inner Exception Type: ");
+                sw.WriteLine(exc.InnerException.GetType().ToString());
+                sw.Write("Inner Exception: ");
+                sw.WriteLine(exc.InnerException.Message);
+                sw.Write("Inner Source: ");
+                sw.WriteLine(exc.InnerException.Source);
+                if (exc.InnerException.StackTrace != null)
+                {
+                    sw.WriteLine("Inner Stack Trace: ");
+                    sw.WriteLine(exc.InnerException.StackTrace);
+                }
+            }
+            sw.Write("Exception Type: ");
+            sw.WriteLine(exc.GetType().ToString());
+            sw.WriteLine("Exception: " + exc.Message);
+            sw.WriteLine("Source: " + source);
+            sw.WriteLine("Stack Trace: ");
+            if (exc.StackTrace != null)
+            {
+                sw.WriteLine(exc.StackTrace);
+                sw.WriteLine();
+            }
+            sw.Close();
+            }
+            catch (IOException)
+            {
+                
+            }
+            catch (Exception)
+            {
+                
+            }
+        }
+    }
+}
+
+
+
+
+
+About.aspx:
+
+<%@ Page Title="Acerca" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="About.aspx.cs" Inherits="MAHLESurvey.About" %>
+
+<asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+    <h2><%: Title %>.</h2>
+    <h3>Política de prevención de riesgos psicosociales.</h3>
+    <h4>En MAHLE Juárez estamos comprometidos en promover un entorno organizacional favorable para nuestros colaboradores, estableciendo los elementos para prevenir, identificar, analizar y atender los factores de riesgo psicosocial y violencia laboral. Observando el ejercicio de los derechos del personal, respetando sus creencias, prácticas o cualquier otra condición que pueda dar origen a la discriminación.</h4>
+</asp:Content>
+
+
+About.aspx.cs:
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+namespace MAHLESurvey
+{
+    public partial class About : Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
+
+
+Contact.aspx:
+
+<%@ Page Title="Contacto" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Contact.aspx.cs" Inherits="MAHLESurvey.Contact" %>
+
+<asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+    <h2><%: Title %>.</h2>
+    <h3>EHS</h3>
+    <address>
+        Elias Gonzalez Estrada<br />
+        MAHLE Compresores, S. de R.L. de C.V.<br />
+    </address>
+
+    <address>
+        <strong>Soporte:</strong>   <a href="mailto:elias.gonzalez.estrada@mx.mahle.com">elias.gonzalez.estrada@mx.mahle.com</a><br />
+    </address>
+</asp:Content>
+
+
+Defualt.aspx:
+
+<%@ Page Title="Inicio" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="MAHLESurvey._Default" %>
+
+<asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+
+    <div class="jumbotron">
+        <h1>¡BIENVENIDO!</h1>
+        <h2>Anexo I</h2>
+        <p class="lead">Cuestionario para identificar a los trabajadores que fueron sujetos a acontecimientos traumaticos severos:</p>
+        <p><button formaction="MAHLESurveyII.aspx" class="btn btn-primary btn-lg">Empezar &raquo;</button></p>
+        <h2>Anexo III</h2>
+        <p class="lead">Cuestionario para identificar los factores de riesgo psicosocial y evaluar el entorno organizacional en los centros de trabajo:</p>
+        <p><button formaction="MAHLESurvey.aspx" class="btn btn-primary btn-lg">Empezar &raquo;</button></p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2>NORMA Oficial Mexicana NOM-035 STPS-2018,</h2>
+            <p>
+                Factores de riesgo psicosocial en el trabajo-Identificación, análisis y prevención.
+            </p>
+        </div>
+    </div>
+
+</asp:Content>
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+namespace MAHLESurvey
+{
+    public partial class _Default : Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetExpires(DateTime.UtcNow.AddHours(-1));
+            Response.Cache.SetNoStore();
+        }
+
+        private void Page_Error(object sender, EventArgs e)
+        {
+            // Get last error from the server.
+            Exception exc = Server.GetLastError();
+
+            // Pass the error on to the error page.
+            Server.Transfer("ErrorPage.aspx?handler=Page_Error%20-%20Default.aspx",
+            true);
+        }
+    }
+}
+
+ErrorPage.aspx:
+
+<%@ Page Title="" Language="C#" AutoEventWireup="true" MasterPageFile="~/Site.Master"  CodeBehind="ErrorPage.aspx.cs" Inherits="MAHLESurvey.ErrorPage" %>
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+    <h2>Error:</h2>
+    <p></p>
+    <asp:Label ID="FriendlyErrorMsg" runat="server" Text="Label" Font-Size="Large" style="color: red"></asp:Label>
+
+    <asp:Panel ID="DetailedErrorPanel" runat="server" Visible="false">
+        <p>&nbsp;</p>
+        <h4>Detailed Error:</h4>
+        <p>
+            <asp:Label ID="ErrorDetailedMsg" runat="server" Font-Size="Small" /><br />
+        </p>
+
+        <h4>Error Handler:</h4>
+        <p>
+            <asp:Label ID="ErrorHandler" runat="server" Font-Size="Small" /><br />
+        </p>
+
+        <h4>Detailed Error Message:</h4>
+        <p>
+            <asp:Label ID="InnerMessage" runat="server" Font-Size="Small" /><br />
+        </p>
+        <p>
+            <asp:Label ID="InnerTrace" runat="server"  />
+        </p>
+    </asp:Panel>
+</asp:Content>
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using MAHLESurvey.Logic;
+
+namespace MAHLESurvey
+{
+    public partial class ErrorPage : System.Web.UI.Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            // Create safe error messages.
+            string generalErrorMsg = "A problem has occurred on this web site. Please try again. " +
+                "If this error continues, please contact support.";
+            string httpErrorMsg = "An HTTP error occurred. Page Not found. Please try again.";
+            string unhandledErrorMsg = "The error was unhandled by application code.";
+
+            // Display safe error message.
+            FriendlyErrorMsg.Text = generalErrorMsg;
+
+            // Determine where error was handled.
+            string errorHandler = Request.QueryString["handler"];
+            if (errorHandler == null)
+            {
+                errorHandler = "Error Page";
+            }
+
+            // Get the last error from the server.
+            Exception ex = Server.GetLastError();
+
+            // Get the error number passed as a querystring value.
+            string errorMsg = Request.QueryString["msg"];
+            if (errorMsg == "404")
+            {
+                ex = new HttpException(404, httpErrorMsg, ex);
+                FriendlyErrorMsg.Text = ex.Message;
+            }
+
+            // If the exception no longer exists, create a generic exception.
+            if (ex == null)
+            {
+                ex = new Exception(unhandledErrorMsg);
+            }
+
+            // Show error details to only you (developer). LOCAL ACCESS ONLY.
+            if (Request.IsLocal)
+            {
+                // Detailed Error Message.
+                ErrorDetailedMsg.Text = ex.Message;
+
+                // Show where the error was handled.
+                ErrorHandler.Text = errorHandler;
+
+                // Show local access details.
+                DetailedErrorPanel.Visible = true;
+
+                if (ex.InnerException != null)
+                {
+                    InnerMessage.Text = ex.GetType().ToString() + "<br/>" +
+                        ex.InnerException.Message;
+                    InnerTrace.Text = ex.InnerException.StackTrace;
+                }
+                else
+                {
+                    InnerMessage.Text = ex.GetType().ToString();
+                    if (ex.StackTrace != null)
+                    {
+                        InnerTrace.Text = ex.StackTrace.ToString().TrimStart();
+                    }
+                }
+            }
+
+            // Log the exception.
+            ExceptionUtility.LogException(ex, errorHandler);
+
+            // Clear the error from the server.
+            Server.ClearError();
+        }
+    }
+}
+
+ExcelExport.aspx:
+
+<%@ Page
+    Title="Excel Export"
+    Language="C#"
+    MasterPageFile="~/Site.Master"
+    AutoEventWireup="true"
+    CodeBehind="ExcelExport.aspx.cs"
+    Inherits="MAHLESurvey.Excelexport"
+%>
+
+<asp:Content
+    ID="BodyContent"
+    ContentPlaceHolderID="MainContent"
+    runat="server">
+
+    <style>
+        #bottomMessage {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            min-height: 60px;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            z-index: 9999;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+
+    <script type="text/javascript">
+        function showBottomMessage(message) {
+            var bottomMessage = document.getElementById("bottomMessage");
+
+            if (!bottomMessage) {
+                return;
+            }
+
+            bottomMessage.innerHTML = message;
+            bottomMessage.style.display = "block";
+
+            setTimeout(function () {
+                bottomMessage.style.opacity = "1";
+            }, 10);
+
+            setTimeout(function () {
+                bottomMessage.style.opacity = "0";
+            }, 3000);
+
+            setTimeout(function () {
+                bottomMessage.style.display = "none";
+            }, 3500);
+        }
+
+        function showIcon(result) {
+            var uploadIcon = document.getElementById("uploadIcon");
+
+            if (!uploadIcon) {
+                return;
+            }
+
+            if (result === "okay") {
+                uploadIcon.src = "Images/okay.png";
+            } else {
+                uploadIcon.src = "Images/reject.png";
+
+                setTimeout(function () {
+                    uploadIcon.src = "";
+                }, 5000);
+            }
+        }
+    </script>
+
+    <div class="jumbotron">
+        <h2>Obtener reportes</h2>
+
+        <h3>
+            Aquí se ingresará el conglomerado de respuestas capturadas en Excel.
+        </h3>
+
+        <h4>
+            Para registrar los resultados capturados en archivos de Excel,
+            estos deben tener un formato específico. El archivo debe contar
+            con el nombre del empleado en la primera columna.
+        </h4>
+
+        <h4>Obtener reporte: Total de empleados encuestados</h4>
+
+        <p>
+            <asp:Button
+                ID="ButtonReport"
+                runat="server"
+                CssClass="btn btn-primary btn-lg"
+                Text="Obtener reporte"
+                OnClick="BtnReport_Click" />
+        </p>
+
+        <h4>Obtener reporte: Respuestas de empleados encuestados</h4>
+
+        <p>
+            <asp:Button
+                ID="NextButton"
+                runat="server"
+                CssClass="btn btn-primary btn-lg"
+                Text="Continuar"
+                OnClick="BtnUpload_Click" />
+        </p>
+    </div>
+
+    <div id="bottomMessage">
+        Mensaje de confirmación
+    </div>
+
+</asp:Content>
+
+
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
+using MAHLESurvey.Logic;
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Web;
+using System.Web.UI;
+
+namespace MAHLESurvey
+{
+    public partial class Excelexport : System.Web.UI.Page
+    {
+        public bool TBDname = false;
+        private int columnsInFile;
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (!Page.IsPostBack)
+            {
+                // Código que solamente debe ejecutarse
+                // cuando se carga la página inicialmente.
+            }
+        }
+
+        protected void BtnReport_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string dataSource = "10.93.30.32";
+                string dataBase = "MahleSurvey";
+                string user = "dlocapp";
+                string password = "dl0capp";
+
+                string connectionString =
+                    "Data Source=" + dataSource +
+                    ";Database=" + dataBase +
+                    ";User=" + user +
+                    ";Password=" + password +
+                    ";Connection Timeout=15";
+
+                string tableName = "dbo.SurveyResults";
+
+                DataTable reportData = new DataTable();
+
+                // 1. Consultar la información de SQL Server
+                using (SqlConnection connection =
+                    new SqlConnection(connectionString))
+                {
+                    string query = "SELECT * FROM " + tableName;
+
+                    using (SqlCommand command =
+                        new SqlCommand(query, connection))
+                    {
+                        using (SqlDataAdapter adapter =
+                            new SqlDataAdapter(command))
+                        {
+                            connection.Open();
+                            adapter.Fill(reportData);
+                        }
+                    }
+                }
+
+                // 2. Verificar si la consulta encontró registros
+                if (reportData.Rows.Count == 0)
+                {
+                    ClientScript.RegisterStartupScript(
+                        GetType(),
+                        "NoData",
+                        "showBottomMessage('No se encontraron registros para generar el reporte.');",
+                        true
+                    );
+
+                    return;
+                }
+
+                byte[] excelFile;
+
+                // 3. Crear el Excel en memoria
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    using (SpreadsheetDocument document =
+                        SpreadsheetDocument.Create(
+                            memoryStream,
+                            DocumentFormat.OpenXml.SpreadsheetDocumentType.Workbook))
+                    {
+                        WorkbookPart workbookPart =
+                            document.AddWorkbookPart();
+
+                        workbookPart.Workbook =
+                            new DocumentFormat.OpenXml.Spreadsheet.Workbook();
+
+                        WorksheetPart worksheetPart =
+                            workbookPart.AddNewPart<WorksheetPart>();
+
+                        SheetData sheetData = new SheetData();
+
+                        worksheetPart.Worksheet =
+                            new Worksheet(sheetData);
+
+                        Sheets sheets =
+                            workbookPart.Workbook.AppendChild(
+                                new Sheets()
+                            );
+
+                        Sheet sheet = new Sheet
+                        {
+                            Id = workbookPart.GetIdOfPart(worksheetPart),
+                            SheetId = 1,
+                            Name = "SurveyResults"
+                        };
+
+                        sheets.Append(sheet);
+
+                        // 4. Agregar los nombres de las columnas
+                        Row headerRow = new Row();
+
+                        foreach (DataColumn column in reportData.Columns)
+                        {
+                            Cell headerCell = new Cell
+                            {
+                                DataType = CellValues.String,
+                                CellValue = new CellValue(column.ColumnName)
+                            };
+
+                            headerRow.Append(headerCell);
+                        }
+
+                        sheetData.Append(headerRow);
+
+                        // 5. Agregar todos los registros
+                        foreach (DataRow dataRow in reportData.Rows)
+                        {
+                            Row excelRow = new Row();
+
+                            foreach (DataColumn column in reportData.Columns)
+                            {
+                                object value = dataRow[column];
+
+                                string cellValue =
+                                    value == DBNull.Value
+                                        ? string.Empty
+                                        : Convert.ToString(value);
+
+                                Cell cell = new Cell
+                                {
+                                    DataType = CellValues.String,
+                                    CellValue = new CellValue(cellValue)
+                                };
+
+                                excelRow.Append(cell);
+                            }
+
+                            sheetData.Append(excelRow);
+                        }
+
+                        worksheetPart.Worksheet.Save();
+                        workbookPart.Workbook.Save();
+                    }
+
+                    excelFile = memoryStream.ToArray();
+                }
+
+                // 6. Descargar el Excel en el navegador
+                string fileName =
+                    "ReporteEncuestas_" +
+                    DateTime.Now.ToString("yyyyMMdd_HHmmss") +
+                    ".xlsx";
+
+                Response.Clear();
+                Response.ClearHeaders();
+                Response.ClearContent();
+                Response.Buffer = true;
+
+                Response.ContentType =
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                Response.AddHeader(
+                    "Content-Disposition",
+                    "attachment; filename=\"" + fileName + "\""
+                );
+
+                Response.AddHeader(
+                    "Content-Length",
+                    excelFile.Length.ToString()
+                );
+
+                Response.BinaryWrite(excelFile);
+                Response.Flush();
+
+                HttpContext.Current.ApplicationInstance.CompleteRequest();
+            }
+            catch (Exception ex)
+            {
+                // Temporalmente, para saber cuál es el error real.
+                ClientScript.RegisterStartupScript(
+                    GetType(),
+                    "ReportError",
+                    "showBottomMessage('Error: " +
+                    System.Web.HttpUtility.JavaScriptStringEncode(ex.Message) +
+                    "');",
+                    true
+                );
+            }
+        }
+
+        protected void BtnUpload_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string dataSource = "10.93.30.32";
+                string dataBase = "MahleSurvey";
+                string user = "dlocapp";
+                string password = "dl0capp";
+
+                string connectionString =
+                    "Data Source=" + dataSource +
+                    ";Database=" + dataBase +
+                    ";User=" + user +
+                    ";Password=" + password +
+                    ";Connection Timeout=15";
+
+                string tableName = "dbo.SurveyResults";
+
+                // Aquí irá el código para consultar o procesar
+                // las respuestas de los empleados.
+
+                ClientScript.RegisterStartupScript(
+                    GetType(),
+                    "UploadMessage",
+                    "showBottomMessage('Proceso ejecutado correctamente.');",
+                    true
+                );
+            }
+            catch (Exception ex)
+            {
+                ExceptionUtility.LogException(ex, "ExcelExport.BtnUpload_Click");
+
+                ClientScript.RegisterStartupScript(
+                    GetType(),
+                    "UploadError",
+                    "showBottomMessage('Ocurrió un error durante el proceso.');",
+                    true
+                );
+            }
+        }
+
+        public SharedStringItem GetSharedStringItemById(
+            WorkbookPart workbookPart,
+            int id)
+        {
+            if (workbookPart.SharedStringTablePart == null)
+            {
+                return null;
+            }
+
+            return workbookPart
+                .SharedStringTablePart
+                .SharedStringTable
+                .Elements<SharedStringItem>()
+                .ElementAtOrDefault(id);
+        }
+
+        public string ExcelCellValue(SharedStringItem sharedStringItem)
+        {
+            if (sharedStringItem == null)
+            {
+                return string.Empty;
+            }
+
+            if (sharedStringItem.Text != null)
+            {
+                return sharedStringItem.Text.Text;
+            }
+
+            if (!string.IsNullOrEmpty(sharedStringItem.InnerText))
+            {
+                return sharedStringItem.InnerText;
+            }
+
+            return string.Empty;
+        }
+
+        private int GetColumnNumber(string cellReference)
+        {
+            string columnReference = Regex.Replace(
+                cellReference,
+                @"[\d]",
+                string.Empty
+            );
+
+            int columnNumber = 0;
+            int multiplier = 1;
+
+            for (int i = columnReference.Length - 1; i >= 0; i--)
+            {
+                columnNumber +=
+                    (columnReference[i] - 'A' + 1) * multiplier;
+
+                multiplier *= 26;
+            }
+
+            return columnNumber;
+        }
+    }
+}
+
+
+ExcelUpload.aspx:
+
+<%@ Page Title="Excel Upload" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="ExcelUpload.aspx.cs" Inherits="MAHLESurvey.Excelupload" %>
+
+<asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+
+    <style>
+        #bottomMessage{
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 15%;
+            background-color: #333;
+            color: white;
+            text-align: match-parent;
+            vertical-align: baseline;
+            padding: 10px;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+
+        }
+
+        .hidden {
+            display:none;
+        }
+    </style>
+
+    <script language="javascript" type="text/javascript">
+
+        function showBottomMessage(message) {
+            var bottomMessage = document.getElementById('bottomMessage');
+
+            bottomMessage.innerHTML = message;
+            bottomMessage.style.display = 'block';
+
+            setTimeout(function() {bottomMessage.style.opacity = '1';}, 10);
+            setTimeout(function() {bottomMessage.style.opacity = '0';}, 3000); // Cambia este valor para ajustar la duración.
+            setTimeout(function() {bottomMessage.style.display = 'none';}, 3500);
+        }
+
+<%--        function uploadFileJS() {
+            var fileUP = document.getElementById('<%FileUpload1.ClientID%>');
+
+            if (fileUP) {
+                fileUP.click();
+            }
+        }--%>
+
+        function showIcon(result) {
+            var uploadIcon = document.getElementsbyid('uploadIcon')
+
+            if (result = "okay") {
+                uploadIcon.src = 'images/okay.png'
+            }
+            else {
+                uploadIcon.src = 'images/reject.png';
+                setTimeout(function () { uploadIcon.src = ''; }, 5000);
+            }
+        }
+
+    </script>
+
+    <div class="jumbotron">
+        <h2>Importar Respuestas</h2>
+        <h3>Aqui se ingresara el conglomerado de respuestas capturadas en excel.</h3>
+        <h4>Para poder registrar los resultados capturados en archivos de excel estos deben de estar en un formato especifico, de lo contrario tendra un error a la hora de cargar el archivo. El archivo debe de contar con el nombre del empleado en la primera columna</h4>        
+        <p>
+            <asp:FileUpload id="FileUpload1" 
+                accept=".xls,.xlsx"
+                runat="server"
+                cssclass = "hidden"
+                />
+        </p>
+        <p>
+            <Button ID="Button1" OnClick="uploadFileJS(); return false;" runat="server" class="btn btn-primary btn-lg">Cargar Archivo</Button>
+            <image id="uploadIcon" src="" alt="" />
+        </p>
+        <p>
+            <Button ID="UploadButton" OnserverClick="BtnUpload_Click" runat="server" class="btn btn-primary btn-lg">Continuar</button>
+        </p>
+            
+        &nbsp;
+        <br/>
+
+    </div>
+
+    <div id="bottomMessage">Mensaje de confirmación</div>
+</asp:Content>
+
+using System;
+using System.Web.UI;
+using System.Data;
+using System.Data.SqlClient;
+using System.IO;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
+using System.Linq;
+using System.Text.RegularExpressions;
+
+namespace MAHLESurvey
+{
+    public partial class Excelupload : System.Web.UI.Page
+    {
+        public bool TBDname = false;
+        private int columnsInFile;
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (Page.IsPostBack)
+            {
+                //Response.Write("<br>Page has been posted back.");
+                //if (FileUpload1.HasFile && Path.GetExtension(FileUpload1.FileName) == ".xlsx" | Path.GetExtension(FileUpload1.FileName) == ".xls")
+                //{
+                //    Image myImg = new Image();
+                //    myImg.ImageUrl = "/Images/okay.png";
+                //    myImg.Visible = true;
+                    
+                //}
+                //else
+                //{
+                //    Image myImg = new Image();
+                //    myImg.ImageUrl = "/Images/reject.png";
+                //    myImg.Visible = true;
+                //}
+                    
+            }
+        }
+
+        public SharedStringItem GetSharedStringItemById(WorkbookPart workbookPart, int id)
+        {
+            return workbookPart.SharedStringTablePart.SharedStringTable.Elements<SharedStringItem>().ElementAt(id);
+        }
+
+        public string ExcelCellValue(SharedStringItem ssItem)
+        {
+            if (ssItem.Text != null)
+            {
+                return ssItem.Text.Text;
+            }
+            else if (ssItem.InnerText != null)
+            {
+                return ssItem.InnerText;
+            }
+            else if (ssItem.InnerXml != null)
+            {
+                return ssItem.InnerXml;
+            }
+            else
+            {
+                return "NULL";
+            }
+        }
+        protected void BtnUpload_Click(object sender, EventArgs e) 
+        {
+            string dataSource = "mxchjrz-db11x";
+            string dataBase = "MahleSurvey";
+            string user = "dlocapp";
+            string password = "dl0capp";
+            string connectionString = "Data Source=" + dataSource + ";Database=" + dataBase + ";User=" + user + ";Password=" + password + ";Connection Timeout=3";
+            string TableName = "dbo.SurveyResults";
+
+            if (FileUpload1.HasFile && Path.GetExtension(FileUpload1.FileName) == ".xlsx" | Path.GetExtension(FileUpload1.FileName) == ".xls")
+            {
+                try
+                {
+                    String filePath = Path.Combine(Server.MapPath("~/Uploads"), FileUpload1.FileName);
+                    FileUpload1.SaveAs(filePath);
+
+                    using (SpreadsheetDocument spreadsheetDocument = SpreadsheetDocument.Open(filePath, false))
+                    {
+                        WorkbookPart workbookPart = spreadsheetDocument.WorkbookPart;
+                        WorksheetPart worksheetPart = workbookPart.WorksheetParts.First();
+                        SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().First();
+
+                        SqlConnection connection = new SqlConnection(connectionString); 
+                        bool pingdatabase = false;
+
+                        if (dataSource == "mxchjrz-db11x")
+                        {
+                            pingdatabase = true;
+                        }
+                        else if (HelperFunctions.PingHost(dataSource))
+                        {
+                            pingdatabase = true;
+                        }
+                        else
+                        {
+                            pingdatabase = false;
+                        }
+                        if (pingdatabase == true)
+                        {
+
+                            if (connection.State == ConnectionState.Closed)
+                            {
+                                connection.Open();
+                            }
+
+                            // Loop through each row in the Excel sheet
+                            foreach (Row row in sheetData.Elements<Row>())
+                            {
+                                DateTime currentDateTime = DateTime.Now;
+                                uint rowIndex = row.RowIndex;
+                                string fechaAct = currentDateTime.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                                string anexoID = "3";
+                                string employeeID;
+                                string answerString;
+
+                                if (rowIndex == 1) 
+                                {
+                                    columnsInFile = 82; // row.Count();
+                                    continue; 
+                                }
+
+                                Cell cellEmployee = row.Elements<Cell>().FirstOrDefault(c => GetColumnNumber(c.CellReference.Value) == 3);
+                                if (cellEmployee == null)
+                                {
+                                    break;
+                                }
+                                employeeID = cellEmployee.InnerText;
+
+                                //Loop through the question-answer pairs for the current employee
+                                for (int questionIndex = 10; questionIndex < columnsInFile; questionIndex++)
+                                {
+                                    // Extract question number and answer based on the column index
+                                    int questionNumber = questionIndex - 9;
+                                    Cell cellQuestion = row.Elements<Cell>().FirstOrDefault(q => GetColumnNumber(q.CellReference.Value) == questionIndex);
+                                    
+                                    int answerInteger = 0;
+                                    
+                                    if (cellQuestion == null)
+                                    {
+                                        answerInteger = 0;
+                                    }
+                                    else
+                                    {
+                                        answerString = ExcelCellValue(GetSharedStringItemById(workbookPart, int.Parse(cellQuestion.InnerText)));
+
+                                        switch (answerString)
+                                        {
+                                            case "Siempre":
+                                                answerInteger = 1;
+                                                break;
+                                            case "Casi siempre":
+                                                answerInteger = 2;
+                                                break;
+                                            case "Algunas veces":
+                                                answerInteger = 3;
+                                                break;
+                                            case "Casi nunca":
+                                                answerInteger = 4;
+                                                break;
+                                            case "Nunca":
+                                                answerInteger = 5;
+                                                break;
+                                            case "Si":
+                                                answerInteger = 6;
+                                                break;
+                                            case "No":
+                                                answerInteger = 7;
+                                                break;
+                                            case "Si ( Continua con las preguntas siguientes)":
+                                                answerInteger = 6;
+                                                break;
+                                            case "No ( Pasa a la siguiente sección)":
+                                                answerInteger = 7;
+                                                questionIndex += 4;
+                                                break;
+                                            case "Sí (Continue con el cuestionario)":
+                                                answerInteger = 6;
+                                                break;
+                                            case "No ( Has concluido el cuestionario)":
+                                                answerInteger = 7;
+                                                questionIndex += 4;
+                                                break;
+                                        }
+                                    }
+                                    
+                                    //check if the record already exist
+                                    string selectQuery = "SELECT COUNT(*) FROM " + TableName + " WHERE NumeroReloj = @employeeID AND IdentificadorPregunta = @questionNumber";
+
+                                    using (SqlCommand selectCommand = new SqlCommand(selectQuery, connection))
+                                    {
+                                        selectCommand.Parameters.AddWithValue("@employeeID", employeeID);
+                                        selectCommand.Parameters.AddWithValue("@questionNumber", "question[" + questionNumber + "]");
+
+                                        int existingRecordCount = (int)selectCommand.ExecuteScalar();
+                                        if (existingRecordCount > 0)
+                                        {
+                                            //Update existing records
+                                            string updateQuery = "UPDATE " + TableName + " SET IdentificadorRespuesta = @answerInteger, FechaActualizacion = @fechaAct WHERE NumeroReloj = @employeeID AND IdentificadorPregunta = @questionNumber";
+
+                                            using (SqlCommand updateCommand = new SqlCommand(updateQuery, connection))
+                                            {
+                                                updateCommand.Parameters.AddWithValue("@answerInteger", answerInteger);
+                                                updateCommand.Parameters.AddWithValue("@employeeID", employeeID);
+                                                updateCommand.Parameters.AddWithValue("@fechaAct", fechaAct);
+                                                updateCommand.Parameters.AddWithValue("@questionNumber", "question[" + questionNumber + "]");
+                                                //updateCommand.ExecuteNonQuery();
+                                            }
+                                        }
+                                        else
+                                        {
+                                            string insertQuery = "INSERT INTO " + TableName + " (NumeroReloj, IdentificadorPregunta, IdentificadorRespuesta, FechaActualizacion, Anexo) VALUES (@employeeID, @questionNumber, @answerInteger, @fechaAct, @anexoId)";
+
+                                            using (SqlCommand insertCommand = new SqlCommand(insertQuery, connection))
+                                            {
+                                                insertCommand.Parameters.AddWithValue("@answerInteger", answerInteger);
+                                                insertCommand.Parameters.AddWithValue("@employeeID", employeeID);
+                                                insertCommand.Parameters.AddWithValue("@questionNumber", "question[" + questionNumber + "]");
+                                                insertCommand.Parameters.AddWithValue("@fechaAct", fechaAct);
+                                                insertCommand.Parameters.AddWithValue("@anexoID", anexoID);
+                                                insertCommand.ExecuteNonQuery();
+                                            }
+                                        }
+                                    }
+                                }
+                            }  
+                        }
+                    }
+
+                    // Delete file after processing
+                    File.Delete(filePath);
+
+                    string script = "showBottomMessage('Archivo cargado exitosamente.'); ";
+                    ScriptManager.RegisterStartupScript(this, GetType(), "ShowMessage", script, true);
+
+
+                }
+                catch (Exception ex)
+                {
+                    string script = "showBottomMessage('Ocurrió un error: "+ ex.Message + "');";
+                    ScriptManager.RegisterStartupScript(this, GetType(), "ShowMessage", script, true);
+                    
+                }
+            }
+            else
+            {
+                string script = "showBottomMessage('Por favor selecciona un archivo para cargar.');";
+                ScriptManager.RegisterStartupScript(this, GetType(), "ShowMessage", script, true);
+
+            }
+        }
+
+        private int GetColumnNumber(string cellReference)
+        {
+            string columnReference = Regex.Replace(cellReference, @"[\d]", string.Empty);
+            int columnNumber = 0;
+            int multiplier = 1;
+
+            for (int i = columnReference.Length - 1; i >= 0; i--)
+            {
+                columnNumber += (columnReference[i] - 'A' + 1) * multiplier;
+                multiplier *= 26;
+            }
+            return columnNumber;
+        }
+    }           
+}
+
+
+Global.asax.cs:
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Optimization;
+using System.Web.Routing;
+using System.Web.Security;
+using System.Web.SessionState;
+using MAHLESurvey.Logic;
+
+namespace MAHLESurvey
+{
+    public class Global : HttpApplication
+    {
+        void Application_Start(object sender, EventArgs e)
+        {
+            // Code that runs on application startup
+            RouteConfig.RegisterRoutes(RouteTable.Routes);
+            BundleConfig.RegisterBundles(BundleTable.Bundles);
+        }
+
+        void Application_Error(object sender, EventArgs e)
+        {
+
+            // Get last error from the server
+            Exception exc = Server.GetLastError();
+
+            if (exc.InnerException != null)
+            {
+                exc = new Exception(exc.InnerException.Message);
+                Server.Transfer("ErrorPage.aspx?handler=Application_Error%20-%20Global.asax",
+                true);
+            }
+            
+        }
+    }
+}
+
+
+MahleSurvey.aspx:
+
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="MAHLESurvey.aspx.cs" Inherits="MAHLESurvey.MAHLESurvey" %>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>MAHLE</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" id="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=yes" />		
+      	<link rel="shortcut icon" href="MahleIcoSH.ico" type="image/x-icon" />
+    <asp:PlaceHolder runat="server">
+        <%: Scripts.Render("~/bundles/modernizr") %>
+    </asp:PlaceHolder>
+    <webopt:bundlereference runat="server" path="~/Content/css" />
+    <link href="~/Images/MahleIcoSH.ico" rel="shortcut icon" type="image/x-icon" />
+    <style type="text/css">
+        .auto-style1 {
+            width: 226px;
+            height: 50px;
+        }
+    </style>
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.min.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <link href="Stylesheet1.css" rel="stylesheet" type="text/css" />
+    <link href="Stylesheet2.css" rel="stylesheet" type="text/css" />	
+    <link href="Stylesheet3.css" rel="stylesheet" type="text/css"/>
+    <link href="Stylesheet4.css" rel="stylesheet" type="text/css"/>
+    <style media="screen">html, body { height: 100% !important; }</style>
+    <form id="surveyForm" runat="server">
+
+	    <input type="hidden" id="encryptedResponseId" name="encryptedResponseId" value="FNUmmOUHV8dFzDlISCETuQ"/>
+	    <input type="hidden" id="encryptedPageId" name="encryptedPageId" value="0EZcGywaoPJ8kTNCtR2sxQ"/>
+
+        <div class="wrapper">
+            <div class="navbar navbar-inverse navbar-fixed-top">
+                <div class="container">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>                        
+                        <img src="Images/MahleMDWB.png" />
+                    </div>
+                    <div class="navbar-collapse collapse">
+                        <ul class="nav navbar-nav">
+                            <li><a runat="server" href="~/">REGRESAR</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+      
+
+       	<section class="page page_1">
+
+   	        <header>
+		        <div class="page-description container"></div>
+	        </header>
+
+            <div class="container">
+
+            <article class="question"  data-ee-question="2183"  data-ee-question-type="11" >
+				 <h3>
+						Anexo III: Cuestionario para identificar los factores de riesgo psicosocial y evaluar el entorno organizacional en los centros de trabajo.							
+				 </h3>
+			    <header class="question-title">
+				    <h4>
+		    		    <i class="warning-inline icon-attention-circled error"></i>
+						    Datos del empleado: 							
+				    </h4>
+			    </header>
+				
+			    <div class="question-answers">
+				    <div class="warning-block">						
+				    </div>	
+
+			        <ol>
+
+                        <li data-ee-optionclass="answer">								
+	    		            <label>Teclee su número de reloj y presione buscar empleado:</label>					                           
+			               <input type="text" id="numeroreloj" name="numeroreloj" value="" runat="server" required="required" />
+                           <asp:RequiredFieldValidator
+                                ID="RequiredFieldValidator7"
+                                ControlToValidate="numeroreloj"
+                                ErrorMessage="Teclee su número de reloj.<br />"
+                                Display="Dynamic"
+                                runat="server" ForeColor="Red" Font-Bold="True" SetFocusOnError="True"/>
+
+                           <asp:RegularExpressionValidator id="RegularExpressionValidator3" 
+                                     ControlToValidate="numeroreloj"
+                                     ValidationExpression="^(?!\s)([\d+]{8,8})(?!\s)$"
+                                     Display="Dynamic"
+                                     ErrorMessage="Número de reloj debe ser numerico y de 8 digitos."
+                                     EnableClientScript="False" 
+                                     runat="server" ForeColor="Red" Font-Bold="True" SetFocusOnError="True"/>     
+		                </li>
+
+                        <li data-ee-optionclass="answer">			     
+	    		            <label id="validlabel" runat="server" visible="false">Se encontró empleado:</label>		
+                            <label id="validemployee" runat="server" style="font-weight: normal" visible="false">No</label>	
+		                </li>
+
+                        <li data-ee-optionclass="answer">			
+                            <p><a class="btn btn-primary btn-lg" id="findemployee" onserverclick="findemployee_Click" runat="server">Buscar Empleado</a></p>      	
+		                </li>
+	
+		                <li data-ee-optionclass="answer">
+                            <label>Nombre y Apellido:</label>	
+                            <label id="nombre" runat="server" style="font-weight: normal"></label>	
+		                </li>
+
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Turno:</label>			
+                            <label id="turno" runat="server" style="font-weight: normal"></label>	
+		                </li>
+	
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Puesto:</label>	
+                            <label id="puesto" runat="server" style="font-weight: normal"></label>	
+		                </li>
+
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Area:</label>	
+                            <label id="area" runat="server" style="font-weight: normal"></label>	
+		                </li>
+
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Planta:</label>		
+                            <label id="planta" runat="server" style="font-weight: normal"></label>	
+		                </li>
+
+                        <li data-ee-optionclass="answer">								
+	    		            <label>Código Planta:</label>		
+                            <label id="region" runat="server" style="font-weight: normal"></label>	
+		                </li>
+
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Sexo:</label>		
+                            <label id="sexo" runat="server" style="font-weight: normal"></label>	
+		                </li>
+                    
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Fecha de nacimiento:</label>		
+                            <label id="fecha" runat="server" style="font-weight: normal"></label>	
+		                </li>
+			
+                    </ol>
+
+			    </div>
+
+		    </article>
+
+        	<header class="question-title">
+				<h4>
+		    		<i class="warning-inline icon-attention-circled error"></i>
+					Para responder las preguntas siguientes considere las condiciones ambientales de su centro de trabajo. 
+				</h4>
+                <asp:CustomValidator ID="CustomValidator" runat="server" Display="Dynamic" ErrorMessage="POR FAVOR, RESPONDA LAS PREGUNTAS DEL CUESTIONARIO." ForeColor="red" OnServerValidate="CustomValidator_ServerValidate" Font-Bold="True"></asp:CustomValidator>
+			</header>
+
+          	<div class="question-answers">
+
+			<div class="warning-block">						
+			</div>
+				  <asp:PlaceHolder ID="QuestionsPlaceholder" runat="server"></asp:PlaceHolder>
+					<table class="matrix">
+
+            	        <thead>
+	        	            <tr>			
+    			                <th></th>
+			                    <th>Siempre</th>			
+			                    <th>Casi siempre</th>			
+			                    <th>Algunas veces</th>			
+			                    <th>Casi nunca</th>			
+			                    <th>Nunca</th>						
+            	            </tr>
+                        </thead>
+
+
+                   <div style="height: 40px"></div>
+
+
+           </div>
+
+        </div>
+
+        </section>
+
+ 		<div class="push"></div>
+
+		</div>
+
+		<footer class="main-footer"/>
+		<div class="container">	
+                              
+			<div class="nav">
+              	<button type="button" name="action" class="btn btn-nav btn-continue" onserverclick="submit_Click" id="submitform" runat="server"  disabled="disabled">
+		            <span>TERMINAR ENCUESTA</span>
+	            </button>
+            </div>
+		
+            <div class="powered-by-container">
+	        <a class="powered-by">
+		         <img src="Images/M2S%20SandForgetica.png" style="height: auto; width: 80px;" />
+	        </a>
+            </div>
+
+
+	    </div>
+
+     <!--Reference to jQuery-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $("#datepicker").datepicker({
+                    changeMonth: true,
+                    changeYear: true,
+                    yearRange: "-65:+0",
+                    dateFormat: 'dd/mm/yy'
+                });
+            });
+        </script>
+
+    </form>
+</body>
+</html>
+
+<%--<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>MAHLE</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" id="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=yes" />
+    <link rel="shortcut icon" href="MahleIcoSH.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style type="text/css">
+        .auto-style1 {
+            width: 226px;
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <link href="Stylesheet1.css" rel="stylesheet" type="text/css" />
+    <link href="Stylesheet2.css" rel="stylesheet" type="text/css" />	
+    <link href="Stylesheet3.css" rel="stylesheet" type="text/css"/>
+    <link href="Stylesheet4.css" rel="stylesheet" type="text/css"/>
+    <style media="screen">html, body { height: 100% !important; }</style>
+    <form id="surveyForm" runat="server">
+
+	    <input type="hidden" id="encryptedResponseId" name="encryptedResponseId" value="FNUmmOUHV8dFzDlISCETuQ"/>
+	    <input type="hidden" id="encryptedPageId" name="encryptedPageId" value="0EZcGywaoPJ8kTNCtR2sxQ"/>
+
+        <div class="wrapper">
+            <div class="navbar navbar-inverse navbar-fixed-top">
+                <div class="container">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>                        
+                        <img src="Images/MahleMDWB.png" />
+                    </div>
+                    <div class="navbar-collapse collapse">
+                        <ul class="nav navbar-nav">
+                            <li><a runat="server" href="~/">REGRESAR</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+      
+
+       	<section class="page page_1">
+
+   	        <header>
+		        <div class="page-description container"></div>
+	        </header>
+
+            <div class="container">
+
+            <article class="question"  data-ee-question="2183"  data-ee-question-type="11" >
+				 <h3>
+						Anexo III: Cuestionario para identificar los factores de riesgo psicosocial y evaluar el entorno organizacional en los centros de trabajo.							
+				 </h3>
+			    <header class="question-title">
+				    <h4>
+		    		    <i class="warning-inline icon-attention-circled error"></i>
+						    Datos del empleado: 							
+				    </h4>
+			    </header>
+				
+			    <div class="question-answers">
+				    <div class="warning-block">						
+				    </div>	
+
+			        <ol>
+
+                        <li data-ee-optionclass="answer">								
+	    		            <label>Teclee su número de reloj y presione buscar empleado:</label>					                           
+			               <input type="text" id="numeroreloj" name="numeroreloj" value="" runat="server" required="required" />
+                           <asp:RequiredFieldValidator
+                                ID="RequiredFieldValidator7"
+                                ControlToValidate="numeroreloj"
+                                ErrorMessage="Teclee su número de reloj.<br />"
+                                Display="Dynamic"
+                                runat="server" ForeColor="Red" Font-Bold="True" SetFocusOnError="True"/>
+
+                           <asp:RegularExpressionValidator id="RegularExpressionValidator3" 
+                                     ControlToValidate="numeroreloj"
+                                     ValidationExpression="^(?!\s)([\d+]{8,8})(?!\s)$"
+                                     Display="Dynamic"
+                                     ErrorMessage="Número de reloj debe ser numerico y de 8 digitos."
+                                     EnableClientScript="False" 
+                                     runat="server" ForeColor="Red" Font-Bold="True" SetFocusOnError="True"/>     
+		                </li>
+
+                        <li data-ee-optionclass="answer">			     
+	    		            <label id="validlabel" runat="server" visible="false">Se encontró empleado:</label>		
+                            <label id="validemployee" runat="server" style="font-weight: normal" visible="false">No</label>	
+		                </li>
+
+                        <li data-ee-optionclass="answer">			
+                            <p><a class="btn btn-primary btn-lg" id="findemployee" onserverclick="findemployee_Click" runat="server">Buscar Empleado</a></p>      	
+		                </li>
+	
+		                <li data-ee-optionclass="answer">
+                            <label>Nombre y Apellido:</label>	
+                            <label id="nombre" runat="server" style="font-weight: normal"></label>	
+		                </li>
+
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Turno:</label>			
+                            <label id="turno" runat="server" style="font-weight: normal"></label>	
+		                </li>
+	
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Puesto:</label>	
+                            <label id="puesto" runat="server" style="font-weight: normal"></label>	
+		                </li>
+
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Area:</label>	
+                            <label id="area" runat="server" style="font-weight: normal"></label>	
+		                </li>
+
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Planta:</label>		
+                            <label id="planta" runat="server" style="font-weight: normal"></label>	
+		                </li>
+
+                        <li data-ee-optionclass="answer">								
+	    		            <label>Código Planta:</label>		
+                            <label id="region" runat="server" style="font-weight: normal"></label>	
+		                </li>
+
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Sexo:</label>		
+                            <label id="sexo" runat="server" style="font-weight: normal"></label>	
+		                </li>
+                    
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Fecha de nacimiento:</label>		
+                            <label id="fecha" runat="server" style="font-weight: normal"></label>	
+		                </li>
+			
+                    </ol>
+
+			    </div>
+
+		    </article>
+
+        	<header class="question-title">
+				<h4>
+		    		<i class="warning-inline icon-attention-circled error"></i>
+					Para responder las preguntas siguientes considere las condiciones ambientales de su centro de trabajo. 
+				</h4>
+                <asp:CustomValidator ID="CustomValidator" runat="server" Display="Dynamic" ErrorMessage="POR FAVOR, RESPONDA LAS PREGUNTAS DEL CUESTIONARIO." ForeColor="red" OnServerValidate="CustomValidator_ServerValidate" Font-Bold="True"></asp:CustomValidator>
+			</header>
+
+          	<div class="question-answers">
+
+			<div class="warning-block">						
+			</div></div>
+
+       <%-- <asp:PlaceHolder ID="QuestionsPlaceholder" runat="server"></asp:PlaceHolder>--%>
+
+<%--		<footer class="main-footer"/>
+
+        <div class="form-group text-right">
+            <button type="button" name="action" class="btn btn-success" onserverclick="submit_Click" id="submitform" runat="server" disabled="disabled">
+                TERMINAR ENCUESTA
+            </button>
+        </div>
+    </form>
+
+    <!-- Reference to jQuery and Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#datepicker").datepicker({
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "-65:+0",
+                dateFormat: 'dd/mm/yy'
+            });
+        });
+    </script>
+</body>
+</html>--%>--%>
+
+using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Net.NetworkInformation;
+using System.Threading;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.HtmlControls;
+using System.Web.UI.WebControls;
+using MAHLESurvey.Logic;
+
+namespace MAHLESurvey
+{
+    public partial class MAHLESurvey : System.Web.UI.Page
+    {
+        List<string> questionname = new List<string>();
+        List<string> answerselected = new List<string>();
+        string connectionString = "Data Source=(mxchjrz-db11x);Database=MAHLESurvey;User=dlocapp;Password=dl0capp;Connection Timeout=3";
+
+        public class SurveyQuestion
+        {
+            public int Id { get; set; }
+            public string Pregunta { get; set; }
+            public string Identificador { get; set; }
+            public List<SurveyAnswer> Respuestas { get; set; }
+        }
+
+        public class SurveyAnswer
+        {
+            public string Texto { get; set; }
+            public int Valor { get; set; }
+        }
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetExpires(DateTime.UtcNow.AddHours(-1));
+            Response.Cache.SetNoStore();
+
+            if (!IsPostBack)
+            {
+                List<SurveyQuestion> questions = GetSurveyQuestions("1"); // Reemplaza "1" con el anexo correspondiente
+                GenerateSurveyQuestions(questions);
+            }
+        }
+
+        private void Page_Error(object sender, EventArgs e)
+        {
+            // Get last error from the server.
+            Exception exc = Server.GetLastError();
+            // Pass the error on to the error page.
+            Server.Transfer("ErrorPage.aspx?handler=Page_Error%20-%20Default.aspx",
+            true);
+        }
+
+        private void GenerateSurveyQuestions(List<SurveyQuestion> questions)
+        {
+            foreach (var question in questions)
+            {
+                // Crear un contenedor para cada pregunta
+                Panel questionPanel = new Panel();
+                questionPanel.CssClass = "question";
+
+                // Crear un label para la pregunta
+                Label questionLabel = new Label();
+                questionLabel.Text = question.Pregunta;
+                questionPanel.Controls.Add(questionLabel);
+
+                // Crear los radio buttons para las respuestas
+                foreach (var answer in question.Respuestas)
+                {
+                    RadioButton radioButton = new RadioButton();
+                    radioButton.GroupName = $"question_{question.Id}";
+                    radioButton.Text = answer.Texto;
+                    radioButton.Attributes["data-valor"] = answer.Valor.ToString();
+                    radioButton.ID = $"question_{question.Id}_{answer.Valor}";
+                    questionPanel.Controls.Add(radioButton);
+                }
+
+                // Agregar el panel de la pregunta al contenedor principal
+                QuestionsPlaceholder.Controls.Add(questionPanel);
+            }
+        }
+
+        public List<SurveyQuestion> GetSurveyQuestions(string anexo)
+        {
+            List<SurveyQuestion> questions = new List<SurveyQuestion>();
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string query = @"
+            SELECT q.id, q.Pregunta, q.Identificador, rv.ValorSiempre, rv.ValorCasiSiempre, rv.ValorAlgunasVeces, rv.ValorCasiNunca, rv.ValorNunca
+            FROM SurveyQuestions q
+            LEFT JOIN ResponseValues rv ON q.Identificador = rv.IdentificadorPregunta
+            WHERE q.Anexo = @Anexo";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Anexo", anexo);
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        SurveyQuestion question = new SurveyQuestion
+                        {
+                            Id = reader.GetInt32(0),
+                            Pregunta = reader.GetString(1),
+                            Identificador = reader.GetString(2),
+                            Respuestas = new List<SurveyAnswer>
+                    {
+                        new SurveyAnswer { Texto = "Siempre", Valor = reader.GetInt32(3) },
+                        new SurveyAnswer { Texto = "Casi siempre", Valor = reader.GetInt32(4) },
+                        new SurveyAnswer { Texto = "Algunas veces", Valor = reader.GetInt32(5) },
+                        new SurveyAnswer { Texto = "Casi nunca", Valor = reader.GetInt32(6) },
+                        new SurveyAnswer { Texto = "Nunca", Valor = reader.GetInt32(7) }
+                    }
+                        };
+
+                        questions.Add(question);
+                    }
+                }
+            }
+
+            return questions;
+        }
+
+        protected void findemployee_Click(object sender, EventArgs e)
+        {
+            SQLGetEmployee();
+        }
+
+        protected void submit_Click(object sender, EventArgs e)
+        {
+            if (Page.IsValid)
+            {
+                var result = SQLTasks();
+                if (result == true)
+                {
+                    Server.Transfer("SurveyCompleted.aspx", true);
+                }
+            }
+        }
+
+        protected bool SQLGetEmployee()
+        {
+            string database = "(mxchjrz-db11x)";
+            SqlConnection sqldatabase = new SqlConnection("Data Source=" + database + ";Database=MAHLESurvey;User=dlocapp;Password=dl0capp;Connection Timeout=3");
+            SqlCommand cmd;
+            Boolean pingdatabase;
+
+            if (database == "(local)")
+            {
+                pingdatabase = true;
+            }
+            else if (HelperFunctions.PingHost(database))
+            {
+                pingdatabase = true;
+            }
+            else
+            {
+                pingdatabase = true;
+            }
+            if (pingdatabase == true)
+            {
+                if (sqldatabase.State == System.Data.ConnectionState.Closed) { sqldatabase.Open(); }
+
+                if (sqldatabase.State != 0)
+                {
+                    cmd = new SqlCommand("SELECT COUNT(*) AS rows FROM EmployeesMahle WHERE (NumeroReloj ='" + numeroreloj.Value + "')", sqldatabase);
+                    int recordsfound = (int)cmd.ExecuteScalar();
+                    if (recordsfound > 0)
+                    {
+                        cmd = new SqlCommand("SELECT TOP(1) Nombre, Turno, Puesto, Planta, Area, Sexo, FechaNacimiento, Region FROM EmployeesMahle WHERE (NumeroReloj ='" + numeroreloj.Value + "')", sqldatabase);
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                nombre.InnerText = reader["Nombre"].ToString();
+                                turno.InnerText = reader["Turno"].ToString();
+                                puesto.InnerText = reader["Puesto"].ToString();
+                                planta.InnerText = reader["Planta"].ToString();
+                                region.InnerText = reader["Region"].ToString();
+                                area.InnerText = reader["Area"].ToString();
+                                sexo.InnerText = reader["Sexo"].ToString();
+                                fecha.InnerText = reader["FechaNacimiento"].ToString();
+                            }
+                            reader.Close();
+
+                        }
+                        validemployee.Visible = true;
+                        validlabel.Visible = true;
+                        validemployee.InnerText = "Si";
+                        numeroreloj.Attributes.Add("style", "background-color:lightgreen");
+                        submitform.Disabled = false;
+                    }
+                    else
+                    {
+                        validemployee.Visible = true;
+                        validlabel.Visible = true;
+                        validemployee.InnerText = "No";
+                        numeroreloj.Attributes.Add("style", "background-color:lightpink");
+                        submitform.Disabled = true;
+                        nombre.InnerText = "";
+                        turno.InnerText = "";
+                        puesto.InnerText = "";
+                        planta.InnerText = "";
+                        region.InnerText = "";
+                        area.InnerText = "";
+                        sexo.InnerText = "";
+                        fecha.InnerText = "";
+                    }
+                }
+            }
+            if (sqldatabase.State == System.Data.ConnectionState.Open)
+            {
+                sqldatabase.Close();
+            }
+            questionname.Clear();
+            answerselected.Clear();
+            return true;
+        }
+
+        //protected bool SQLTasks()
+        //{
+        //    string database = "(local)";
+        //    SqlConnection sqldatabase = new SqlConnection("Data Source=" + database + ";Database=MAHLESurvey;User=dlocapp;Password=dl0capp;Connection Timeout=3");
+        //    SqlCommand cmd;
+        //    Boolean pingdatabase;
+
+        //    if (database == "(local)")
+        //    {
+        //        pingdatabase = true;
+        //    }
+        //    else if (HelperFunctions.PingHost(database))
+        //    {
+        //        pingdatabase = true;
+        //    }
+        //    else
+        //    {
+        //        pingdatabase = false;
+        //    }
+        //        if (pingdatabase == true)
+        //        {
+
+        //            if (sqldatabase.State == System.Data.ConnectionState.Closed)
+        //            {
+        //                sqldatabase.Open();
+        //            }
+
+        //            if (sqldatabase.State != 0)
+        //            {
+        //                string dateupdate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        //                cmd = new SqlCommand("SELECT COUNT(*) AS rows FROM SurveyEmployees WHERE (NumeroReloj ='" + numeroreloj.Value + "')", sqldatabase);
+        //                int recordsfound = (int)cmd.ExecuteScalar();
+        //                if (recordsfound == 0)
+        //                {
+        //                    cmd = new SqlCommand("Insert into SurveyEmployees (NumeroReloj, Nombre, Turno, Puesto, Planta, Area, Sexo, FechaNacimiento, FechaActualizacion, Region) values ('" + numeroreloj.Value + "','" + nombre.InnerText + "','" + turno.InnerText + "','" + puesto.InnerText + "','" + planta.InnerText + "','" + area.InnerText + "','" + sexo.InnerText + "','" + fecha.InnerText + "', '" + dateupdate + "','" + region.InnerText + "')", sqldatabase);
+        //                    IAsyncResult result = cmd.BeginExecuteNonQuery();
+        //                    while (true)
+        //                    {
+        //                        if (result.IsCompleted)
+        //                        {
+        //                            break;
+        //                        }
+        //                    }
+        //                    cmd.EndExecuteNonQuery(result);
+        //                if (questionname.Count == answerselected.Count)
+        //                    {
+        //                        for (var i = 0; i < questionname.Count; i++)
+        //                        {
+        //                        cmd = new SqlCommand("Insert into SurveyResults (NumeroReloj, IdentificadorPregunta, IdentificadorRespuesta, FechaActualizacion, Anexo) values ('" + numeroreloj.Value + "','" + questionname[i] + "','" + answerselected[i] + "', '" + dateupdate + "', '3')", sqldatabase);
+        //                        IAsyncResult result2  = cmd.BeginExecuteNonQuery();
+        //                        while (true)
+        //                        {
+        //                            if (result2.IsCompleted)
+        //                            {
+        //                                break;
+        //                            }
+        //                        }
+        //                        cmd.EndExecuteNonQuery(result2);
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        throw new InvalidOperationException("An InvalidOperationException " +
+        //                        "occurred in the SQLTasks handler on the MAHLESurvey.aspx page: QUESTIONS COUNT DOES NOT MATCH WITH NUMBER OF ANSWERS.");
+        //                    }
+
+        //                }
+        //                else if (recordsfound > 0)
+        //                {
+        //                    if (questionname.Count == answerselected.Count)
+        //                    {
+        //                        cmd = new SqlCommand("DELETE FROM SurveyResults WHERE NumeroReloj='" + numeroreloj.Value + "' AND Anexo='3'", sqldatabase);
+        //                        IAsyncResult result5 = cmd.BeginExecuteNonQuery();
+        //                        while (true)
+        //                        {
+        //                            if (result5.IsCompleted)
+        //                            {
+        //                                break;
+        //                            }
+        //                        }
+        //                        cmd.EndExecuteNonQuery(result5);
+        //                    for (var i = 0; i < questionname.Count; i++)
+        //                            {
+        //                                cmd = new SqlCommand("Insert into SurveyResults (NumeroReloj, IdentificadorPregunta, IdentificadorRespuesta, FechaActualizacion, Anexo) values ('" + numeroreloj.Value + "','" + questionname[i] + "','" + answerselected[i] + "', '" + dateupdate + "', '3')", sqldatabase);
+        //                                IAsyncResult result2 = cmd.BeginExecuteNonQuery();
+        //                                while (true)
+        //                                {
+        //                                    if (result2.IsCompleted)
+        //                                    {
+        //                                        break;
+        //                                    }
+        //                                }
+        //                                cmd.EndExecuteNonQuery(result2);
+        //                            }
+        //                    }
+        //                    else
+        //                    {
+        //                        throw new InvalidOperationException("An InvalidOperationException " +
+        //                        "occurred in the SQLTasks handler on the MAHLESurvey.aspx page: QUESTIONS COUNT DOES NOT MATCH WITH NUMBER OF ANSWERS.");
+        //                    }
+        //                }
+        //            }
+        //        }
+        //        if (sqldatabase.State == System.Data.ConnectionState.Open)
+        //        {
+        //            sqldatabase.Close();
+        //        }
+        //        questionname.Clear();
+        //        answerselected.Clear();
+        //        return true;          
+        //}
+
+        protected bool SQLTasks()
+        {
+            string database = "(local)";
+            SqlConnection sqldatabase = new SqlConnection("Data Source=" + database + ";Database=MAHLESurvey;User=dlocapp;Password=dl0capp;Connection Timeout=3");
+            SqlCommand cmd;
+            Boolean pingdatabase;
+
+            if (database == "(local)")
+            {
+                pingdatabase = true;
+            }
+            else if (HelperFunctions.PingHost(database))
+            {
+                pingdatabase = true;
+            }
+            else
+            {
+                pingdatabase = false;
+            }
+            if (pingdatabase == true)
+            {
+                if (sqldatabase.State == System.Data.ConnectionState.Closed)
+                {
+                    sqldatabase.Open();
+                }
+
+                if (sqldatabase.State != 0)
+                {
+                    string dateupdate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    cmd = new SqlCommand("SELECT COUNT(*) AS rows FROM SurveyEmployees WHERE (NumeroReloj ='" + numeroreloj.Value + "')", sqldatabase);
+                    int recordsfound = (int)cmd.ExecuteScalar();
+                    if (recordsfound == 0)
+                    {
+                        cmd = new SqlCommand("Insert into SurveyEmployees (NumeroReloj, Nombre, Turno, Puesto, Planta, Area, Sexo, FechaNacimiento, FechaActualizacion, Region) values (@NumeroReloj, @Nombre, @Turno, @Puesto, @Planta, @Area, @Sexo, @FechaNacimiento, @FechaActualizacion, @Region)", sqldatabase);
+                        cmd.Parameters.AddWithValue("@NumeroReloj", numeroreloj.Value);
+                        cmd.Parameters.AddWithValue("@Nombre", nombre.InnerText);
+                        cmd.Parameters.AddWithValue("@Turno", turno.InnerText);
+                        cmd.Parameters.AddWithValue("@Puesto", puesto.InnerText);
+                        cmd.Parameters.AddWithValue("@Planta", planta.InnerText);
+                        cmd.Parameters.AddWithValue("@Area", area.InnerText);
+                        cmd.Parameters.AddWithValue("@Sexo", sexo.InnerText);
+                        cmd.Parameters.AddWithValue("@FechaNacimiento", fecha.InnerText);
+                        cmd.Parameters.AddWithValue("@FechaActualizacion", dateupdate);
+                        cmd.Parameters.AddWithValue("@Region", region.InnerText);
+                        cmd.ExecuteNonQuery();
+
+                        foreach (Control control in QuestionsPlaceholder.Controls)
+                        {
+                            if (control is Panel)
+                            {
+                                Panel questionPanel = (Panel)control;
+                                foreach (Control childControl in questionPanel.Controls)
+                                {
+                                    if (childControl is RadioButton radioButton && radioButton.Checked)
+                                    {
+                                        int questionId = int.Parse(radioButton.GroupName.Split('_')[1]);
+                                        int answerValue = int.Parse(radioButton.Attributes["data-valor"]);
+                                        string answerText = radioButton.Text;
+
+                                        cmd = new SqlCommand("Insert into SurveyResults (NumeroReloj, IdentificadorPregunta, IdentificadorRespuesta, FechaActualizacion, Anexo, ValorRespuesta) values (@NumeroReloj, @IdentificadorPregunta, @IdentificadorRespuesta, @FechaActualizacion, @Anexo, @ValorRespuesta)", sqldatabase);
+                                        cmd.Parameters.AddWithValue("@NumeroReloj", numeroreloj.Value);
+                                        cmd.Parameters.AddWithValue("@IdentificadorPregunta", questionId);
+                                        cmd.Parameters.AddWithValue("@IdentificadorRespuesta", answerText);
+                                        cmd.Parameters.AddWithValue("@FechaActualizacion", dateupdate);
+                                        cmd.Parameters.AddWithValue("@Anexo", "1");
+                                        cmd.Parameters.AddWithValue("@ValorRespuesta", answerValue);
+
+                                        cmd.ExecuteNonQuery();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (recordsfound > 0)
+                    {
+                        cmd = new SqlCommand("DELETE FROM SurveyResults WHERE NumeroReloj=@NumeroReloj AND Anexo='1'", sqldatabase);
+                        cmd.Parameters.AddWithValue("@NumeroReloj", numeroreloj.Value);
+                        cmd.ExecuteNonQuery();
+
+                        foreach (Control control in QuestionsPlaceholder.Controls)
+                        {
+                            if (control is Panel)
+                            {
+                                Panel questionPanel = (Panel)control;
+                                foreach (Control childControl in questionPanel.Controls)
+                                {
+                                    if (childControl is RadioButton radioButton && radioButton.Checked)
+                                    {
+                                        int questionId = int.Parse(radioButton.GroupName.Split('_')[1]);
+                                        int answerValue = int.Parse(radioButton.Attributes["data-valor"]);
+                                        string answerText = radioButton.Text;
+
+                                        cmd = new SqlCommand("Insert into SurveyResults (NumeroReloj, IdentificadorPregunta, IdentificadorRespuesta, FechaActualizacion, Anexo, ValorRespuesta) values (@NumeroReloj, @IdentificadorPregunta, @IdentificadorRespuesta, @FechaActualizacion, @Anexo, @ValorRespuesta)", sqldatabase);
+                                        cmd.Parameters.AddWithValue("@NumeroReloj", numeroreloj.Value);
+                                        cmd.Parameters.AddWithValue("@IdentificadorPregunta", questionId);
+                                        cmd.Parameters.AddWithValue("@IdentificadorRespuesta", answerText);
+                                        cmd.Parameters.AddWithValue("@FechaActualizacion", dateupdate);
+                                        cmd.Parameters.AddWithValue("@Anexo", "1");
+                                        cmd.Parameters.AddWithValue("@ValorRespuesta", answerValue);
+
+                                        cmd.ExecuteNonQuery();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (sqldatabase.State == System.Data.ConnectionState.Open)
+            {
+                sqldatabase.Close();
+            }
+
+            return true;
+        }
+
+        protected List<HtmlInputRadioButton> GetRadioButtonsByGroupName(Control parentControl, string groupName)
+        {
+            List<HtmlInputRadioButton> result = new List<HtmlInputRadioButton>();
+            GetRadioButtonsByGroupName(parentControl, groupName, result);
+            return result;
+        }
+
+        protected void GetRadioButtonsByGroupName(Control parentControl, string groupName, List<HtmlInputRadioButton> list)
+        {
+                foreach (Control c in parentControl.Controls)
+            {
+                if (c is HtmlInputRadioButton && ((HtmlInputRadioButton)c).Name.Equals(groupName))
+                {
+                    list.Add(c as HtmlInputRadioButton);
+                }
+                else if (c.HasControls())
+                {
+                    GetRadioButtonsByGroupName(c, groupName, list);
+                }
+            }
+        }
+
+        //protected void CustomValidator_ServerValidate(object source, ServerValidateEventArgs args)
+        //{
+        //    var questionnumber = surveyForm.Controls.GetRadioButtonGroup();
+        //    bool questionvalidation = true;
+        //    bool optional65itemSelected = false;
+        //    bool optional70itemSelected = false;
+        //    if (validemployee.InnerText == "Si")
+        //    {
+        //        foreach (string c in questionnumber)
+        //        {
+        //            HtmlInputRadioButton SelectedRadioButton = (HtmlInputRadioButton)GetRadioButtonsByGroupName(this, c).FirstOrDefault(x => x.Checked);
+        //            string questiontofind = c.Replace("[", "").Replace("]", "");
+        //            HtmlTableCell questioncolor = (HtmlTableCell)this.FindControl(questiontofind);
+        //            questioncolor.Attributes.Add("style", "background-color:");
+        //            if (SelectedRadioButton == null)
+        //            {
+        //                if (c == "question[66]" || c == "question[67]" || c == "question[68]" || c == "question[69]")
+        //                {
+        //                    if (optional65itemSelected == true)
+        //                    {
+        //                        questioncolor.Attributes.Add("style", "background-color:orange");
+        //                        questionvalidation = false;
+        //                    }
+
+        //                }
+        //                else if (c == "question[71]" || c == "question[72]" || c == "question[73]" || c == "question[74]")
+        //                {
+        //                    if (optional70itemSelected == true)
+        //                    {
+        //                        questioncolor.Attributes.Add("style", "background-color:orange");
+        //                        questionvalidation = false;
+        //                    }
+
+        //                }
+        //                else if (c != "question[66]" && c != "question[67]" && c != "question[68]"
+        //                        && c != "question[69]" && c != "question[71]" && c != "question[72]"
+        //                        && c != "question[73]" && c != "question[74]")
+        //                {
+        //                    questioncolor.Attributes.Add("style", "background-color:orange");
+        //                    questionvalidation = false;
+        //                }
+        //            }
+        //            else
+        //            {
+        //                if (c == "question[65]" && SelectedRadioButton.Value == "6")
+        //                {
+        //                    optional65itemSelected = true;
+        //                }
+        //                if (c == "question[70]" && SelectedRadioButton.Value == "6")
+        //                {
+        //                    optional70itemSelected = true;
+        //                }
+        //            }
+        //            if (SelectedRadioButton != null && questionvalidation == true)
+        //            {
+        //                questionname.Add(SelectedRadioButton.Name);
+        //                answerselected.Add(SelectedRadioButton.Value);
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        questionvalidation = false;
+        //    }
+        //        args.IsValid = questionvalidation;
+        //}
+
+        //protected void CustomValidator_ServerValidate(object source, ServerValidateEventArgs args)
+        //{
+        //    bool allAnswered = true;
+
+        //    foreach (GridViewRow row in myGridView.Rows)
+        //    {
+        //        RadioButtonList rbl = (RadioButtonList)row.FindControl("rblAnswers");
+        //        if (rbl != null && rbl.SelectedValue == "")
+        //        {
+        //            allAnswered = false;
+        //            break;
+        //        }
+        //    }
+
+        //    args.IsValid = allAnswered;
+        //    if (!allAnswered)
+        //    {
+        //        CustomValidator.ErrorMessage = "Por favor, responda todas las preguntas.";
+        //    }
+        //}
+
+        protected void CustomValidator_ServerValidate(object source, ServerValidateEventArgs args)
+        {
+            bool questionvalidation = true;
+            bool optional65itemSelected = false;
+            bool optional70itemSelected = false;
+
+            if (validemployee.InnerText == "Si")
+            {
+                foreach (Control control in QuestionsPlaceholder.Controls)
+                {
+                    if (control is Panel questionPanel)
+                    {
+                        bool answered = false;
+                        string questionId = string.Empty;
+
+                        foreach (Control childControl in questionPanel.Controls)
+                        {
+                            if (childControl is RadioButton radioButton)
+                            {
+                                questionId = radioButton.GroupName.Split('_')[1];
+                                if (radioButton.Checked)
+                                {
+                                    answered = true;
+
+                                    if (questionId == "65" )
+                                    {
+                                        optional65itemSelected = true;
+                                    }
+                                    if (questionId == "70" )
+                                    {
+                                        optional70itemSelected = true;
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (!answered)
+                        {
+                            if (questionId == "66" || questionId == "67" || questionId == "68" || questionId == "69")
+                            {
+                                if (optional65itemSelected)
+                                {
+                                    questionvalidation = false;
+                                    break;
+                                }
+                            }
+                            else if (questionId == "71" || questionId == "72" || questionId == "73" || questionId == "74")
+                            {
+                                if (optional70itemSelected)
+                                {
+                                    questionvalidation = false;
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                questionvalidation = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                questionvalidation = false;
+            }
+
+            args.IsValid = questionvalidation;
+            if (!questionvalidation)
+            {
+                CustomValidator.ErrorMessage = "Por favor, responda todas las preguntas obligatorias.";
+            }
+        }
+    }
+
+
+    public static class HelperFunctions
+    {
+        public static HashSet<string> GetRadioButtonGroup(this ControlCollection collection)
+        {
+            HashSet<string> questionnumber = new HashSet<string>();
+                foreach (var control in collection)
+                {
+                    if (control is HtmlInputRadioButton)
+                    {
+                        var radioControl = ((HtmlInputRadioButton)control);
+                        questionnumber.Add(radioControl.Name);
+                    }
+                }
+
+                return new HashSet<string>(questionnumber);
+        }
+
+        public static bool PingHost(string nameOrAddress)
+        {
+            bool pingable = false;
+            Ping pinger = null;
+
+            try
+            {
+                pinger = new Ping();
+                PingReply reply = pinger.Send(nameOrAddress);
+                pingable = reply.Status == IPStatus.Success;
+            }
+            catch (PingException e)
+            {
+                ExceptionUtility.LogException(e, "PingHost in HelperFunctions class - MAHLESurvey.aspx");
+                return false;
+            }
+            finally
+            {
+                if (pinger != null)
+                {
+                    pinger.Dispose();
+                }
+            }
+            return pingable;
+        }
+
+    }
+}
+
+
+MahleSurveyII.aspx:
+
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="MAHLESurveyII.aspx.cs" Inherits="MAHLESurvey.MAHLESurveyII" %>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>MAHLE</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" id="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=yes" />		
+      	<link rel="shortcut icon" href="MahleIcoSH.ico" type="image/x-icon" />
+    <asp:PlaceHolder runat="server">
+        <%: Scripts.Render("~/bundles/modernizr") %>
+    </asp:PlaceHolder>
+    <webopt:bundlereference runat="server" path="~/Content/css" />
+    <link href="~/Images/MahleIcoSH.ico" rel="shortcut icon" type="image/x-icon" />
+    <style type="text/css">
+        .auto-style1 {
+            width: 226px;
+            height: 50px;
+        }
+    </style>
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.min.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <link href="Stylesheet1.css" rel="stylesheet" type="text/css" />
+    <link href="Stylesheet2.css" rel="stylesheet" type="text/css" />	
+    <link href="Stylesheet3.css" rel="stylesheet" type="text/css"/>
+    <link href="Stylesheet4.css" rel="stylesheet" type="text/css"/>
+    <style media="screen">html, body { height: 100% !important; }</style>
+    <form id="surveyForm" runat="server">
+
+	    <input type="hidden" id="encryptedResponseId" name="encryptedResponseId" value="FNUmmOUHV8dFzDlISCETuQ"/>
+	    <input type="hidden" id="encryptedPageId" name="encryptedPageId" value="0EZcGywaoPJ8kTNCtR2sxQ"/>
+
+        <div class="wrapper">
+            <div class="navbar navbar-inverse navbar-fixed-top">
+                <div class="container">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>                        
+                        <img src="Images/MahleMDWB.png" />
+                    </div>
+                    <div class="navbar-collapse collapse">
+                        <ul class="nav navbar-nav">
+                            <li><a runat="server" href="~/">REGRESAR</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+      
+
+       	<section class="page page_1">
+
+   	        <header>
+		        <div class="page-description container"></div>
+	        </header>
+
+            <div class="container">
+
+            <article class="question"  data-ee-question="2183"  data-ee-question-type="11" >
+				
+            	 <h3>
+						Anexo I: Cuestionario para identificar a los trabajadores que fueron sujetos a acontecimientos traumaticos severos.							
+				 </h3>
+
+			    <header class="question-title">
+				    <h4>
+		    		    <i class="warning-inline icon-attention-circled error"></i>
+						    Datos del empleado: 							
+				    </h4>
+			    </header>
+				
+			    <div class="question-answers">
+				    <div class="warning-block">						
+				    </div>	
+
+			        <ol>
+
+                        <li data-ee-optionclass="answer">								
+	    		            <label>Teclee su número de reloj y presione buscar empleado:</label>					                           
+			               <input type="text" id="numeroreloj" name="numeroreloj" value="" runat="server" required="required" />
+                           <asp:RequiredFieldValidator
+                                ID="RequiredFieldValidator7"
+                                ControlToValidate="numeroreloj"
+                                ErrorMessage="Teclee su número de reloj.<br />"
+                                Display="Dynamic"
+                                runat="server" ForeColor="Red" Font-Bold="True" SetFocusOnError="True"/>
+
+                           <asp:RegularExpressionValidator id="RegularExpressionValidator3" 
+                                     ControlToValidate="numeroreloj"
+                                     ValidationExpression="^(?!\s)([\d+]{8,8})(?!\s)$"
+                                     Display="Dynamic"
+                                     ErrorMessage="Número de reloj debe ser numerico y de 8 digitos."
+                                     EnableClientScript="False" 
+                                     runat="server" ForeColor="Red" Font-Bold="True" SetFocusOnError="True"/>                                                     
+		                </li>
+
+                        <li data-ee-optionclass="answer">			     
+	    		            <label id="validlabel" runat="server" visible="false">Se encontró empleado:</label>		
+                            <label id="validemployee" runat="server" style="font-weight: normal" visible="false">No</label>	
+		                </li>
+
+                        <li data-ee-optionclass="answer">			
+                            <p><a class="btn btn-primary btn-lg" id="findemployee" onserverclick="findemployee_Click" runat="server">Buscar Empleado</a></p>      
+		                </li>
+	
+		                <li data-ee-optionclass="answer">
+                            <label>Nombre y Apellido:</label>	
+                            <label id="nombre" runat="server" style="font-weight: normal"></label>	
+		                </li>
+
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Turno:</label>			
+                            <label id="turno" runat="server" style="font-weight: normal"></label>	
+		                </li>
+	
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Puesto:</label>	
+                            <label id="puesto" runat="server" style="font-weight: normal"></label>	
+		                </li>
+
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Area:</label>	
+                            <label id="area" runat="server" style="font-weight: normal"></label>	
+		                </li>
+
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Planta:</label>		
+                            <label id="planta" runat="server" style="font-weight: normal"></label>	
+		                </li>
+
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Código Planta:</label>		
+                            <label id="region" runat="server" style="font-weight: normal"></label>	
+		                </li>
+
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Sexo:</label>		
+                            <label id="sexo" runat="server" style="font-weight: normal"></label>	
+		                </li>
+                    
+		                <li data-ee-optionclass="answer">								
+	    		            <label>Fecha de nacimiento:</label>		
+                            <label id="fecha" runat="server" style="font-weight: normal"></label>	
+		                </li>
+			
+                    </ol>
+
+			    </div>
+
+		    </article>
+
+          	<div class="question-answers">
+
+             <asp:CustomValidator ID="CustomValidator" runat="server" Display="Dynamic" ErrorMessage="POR FAVOR, RESPONDA LAS PREGUNTAS DEL CUESTIONARIO." ForeColor="red" OnServerValidate="CustomValidator_ServerValidate" Font-Bold="True"></asp:CustomValidator>
+
+             <header class="question-title"> 
+				<h4>
+		    		<i class="warning-inline icon-attention-circled error"></i>
+					I.- Acontecimiento traumático severo
+				</h4>
+			</header>                 
+
+			<div class="warning-block">						
+			</div>
+                	<table class="matrix">
+            	        <thead>
+	        	            <tr>			
+    			                <th style="text-align: left; background-color: #00FFFF;" >¿Ha presenciado o sufrido alguna vez, durante o con motivo del trabajo un acontecimiento como los siguientes:</th>
+			                    <th>Si</th>			
+			                    <th>No</th>								
+            	            </tr>
+                        </thead>
+                        <tbody>
+                                 <tr>
+				 			        <th id="question1" runat="server" scope="row">Accidente que tenga como consecuencia la muerte, la pérdida de un miembro o una lesión grave?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio11" name="question[1]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio12" name="question[1]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>
+                                 <tr>
+				 			        <th id="question2" runat="server" scope="row">Asaltos?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio1" name="question[2]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio2" name="question[2]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>	
+                                 <tr>
+				 			        <th id="question3" runat="server" scope="row">Actos violentos que derivaron en lesiones graves?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio3" name="question[3]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio4" name="question[3]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>	
+                                 <tr>
+				 			        <th id="question4" runat="server" scope="row">Secuestro?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio5" name="question[4]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio6" name="question[4]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>	
+                                 <tr>
+				 			        <th id="question5" runat="server" scope="row">Amenazas?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio7" name="question[5]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio8" name="question[5]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>	
+                                 <tr>
+				 			        <th id="question6" runat="server" scope="row">Cualquier otro que ponga en riesgo su vida o salud, y/o la de otras personas?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio9" name="question[6]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio10" name="question[6]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>	                            
+
+                       </tbody>
+
+                    </table>		
+
+                   <div style="height: 40px"></div>
+
+                 <h3 style="color: #FF0000">
+						Si todas las respuestas de la seccion I Acontecimiento traumatico severo, son "NO", no es necesario responder las siguientes preguntas. 							
+				 </h3>
+
+                   <div style="height: 20px"></div>
+             <header class="question-title"> 
+				<h4>
+		    		<i class="warning-inline icon-attention-circled error"></i>
+					II.- Recuerdos persistentes sobre el acontecimiento (durante el último mes):
+				</h4>
+			</header>                 
+
+			<div class="warning-block">						
+			</div>
+                	<table class="matrix">
+            	        <thead>
+	        	            <tr>			
+                                <th></th>	
+			                    <th>Si</th>			
+			                    <th>No</th>								
+            	            </tr>
+                        </thead>
+                        <tbody>
+                                 <tr>
+				 			        <th id="question7" runat="server" scope="row">¿Ha tenido recuerdos recurrentes sobre el acontecimiento que le provocan malestares?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio13" name="question[7]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio14" name="question[7]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>
+                                 <tr>
+				 			        <th id="question8" runat="server" scope="row">¿Ha tenido sueños de carácter recurrente sobre el acontecimiento, que le producenmalestar?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio15" name="question[8]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio16" name="question[8]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>	
+                
+
+                       </tbody>
+
+                    </table>			
+
+                   <div style="height: 40px"></div>
+                  
+             <header class="question-title"> 
+				<h4>
+		    		<i class="warning-inline icon-attention-circled error"></i>
+					III.- Esfuerzo por evitar circunstancias parecidas o asociadas al acontecimiento (durante el último mes):
+				</h4>
+			</header>                 
+
+			<div class="warning-block">						
+			</div>
+                	<table class="matrix">
+            	        <thead>
+	        	            <tr>			
+                                <th></th>
+			                    <th>Si</th>			
+			                    <th>No</th>								
+            	            </tr>
+                        </thead>
+                        <tbody>
+                                 <tr>
+				 			        <th id="question9" runat="server" scope="row">¿Se ha esforzado por evitar todo tipo de sentimientos, conversaciones o situaciones que le puedan recordar el acontecimiento?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio17" name="question[9]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio18" name="question[9]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>
+                                 <tr>
+				 			        <th id="question10" runat="server" scope="row">¿Se ha esforzado por evitar todo tipo de actividades, lugares o personas que motivan recuerdos del acontecimiento?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio19" name="question[10]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio20" name="question[10]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>	
+                                 <tr>
+				 			        <th id="question11" runat="server" scope="row">¿Ha tenido dificultad para recordar alguna parte importante del evento?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio21" name="question[11]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio22" name="question[11]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>
+                                 <tr>
+				 			        <th id="question12" runat="server" scope="row">¿Ha disminuido su interés en sus actividades cotidianas?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio23" name="question[12]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio24" name="question[12]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>	
+                                 <tr>
+				 			        <th id="question13" runat="server" scope="row">¿Se ha sentido usted alejado o distante de los demás?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio25" name="question[13]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio26" name="question[13]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>
+                                 <tr>
+				 			        <th id="question14" runat="server" scope="row">¿Ha notado que tiene dificultad para expresar sus sentimientos?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio27" name="question[14]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio28" name="question[14]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>	
+                                 <tr>
+				 			        <th id="question15" runat="server" scope="row">¿Ha tenido la impresión de que su vida se va a acortar, que va a morir antes que otras personas o que tiene un futuro limitado?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio29" name="question[15]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio30" name="question[15]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>	
+                       </tbody>
+
+                    </table>		
+
+                   <div style="height: 40px"></div>
+
+             <header class="question-title"> 
+				<h4>
+		    		<i class="warning-inline icon-attention-circled error"></i>
+					IV.- Afectación (durante el último mes):
+				</h4>
+			</header>                 
+
+			<div class="warning-block">						
+			</div>
+                	<table class="matrix">
+            	        <thead>
+	        	            <tr>			
+                                <th></th>
+			                    <th>Si</th>			
+			                    <th>No</th>								
+            	            </tr>
+                        </thead>
+                        <tbody>
+                                 <tr>
+				 			        <th id="question16" runat="server" scope="row">¿Ha tenido usted dificultades para dormir?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio31" name="question[16]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio32" name="question[16]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>
+                                 <tr>
+				 			        <th id="question17" runat="server" scope="row">¿Ha estado particularmente irritable o le han dado arranques de coraje?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio33" name="question[17]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio34" name="question[17]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>	
+                                 <tr>
+				 			        <th id="question18" runat="server" scope="row">¿Ha tenido dificultad para concentrarse?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio35" name="question[18]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio36" name="question[18]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>
+                                 <tr>
+				 			        <th id="question19" runat="server" scope="row">¿Ha estado nervioso o constantemente en alerta?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio37" name="question[19]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio38" name="question[19]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>	
+                                 <tr>
+				 			        <th id="question20" runat="server" scope="row">¿Se ha sobresaltado fácilmente por cualquier cosa?</th>								
+					                <td>
+						                <label class="selectable hoverable">
+							            <input type="radio" value="6" id="Radio39" name="question[20]" runat="server"/>
+							            <i    class="selector-circle"></i>
+								        <span class="hidden-label">Nunca</span>
+						                </label>                                     
+					                </td>
+				
+					                <td>
+						                <label class="selectable hoverable">
+					    		        <input type="radio" value="7" id="Radio40" name="question[20]" runat="server"/>
+					    		        <i    class="selector-circle"></i>							
+						    	        <span class="hidden-label">Casi nunca</span>
+					        	        </label>
+				        	        </td>
+
+	    			                <th></th>				
+		            	        </tr>
+
+                       </tbody>
+
+                    </table>	                  
+                  
+                  
+            </div>
+
+        </div>
+
+        </section>
+
+ 		<div class="push"></div>
+
+		</div>
+
+		<footer class="main-footer"/>
+		<div class="container">	
+                              
+			<div class="nav">
+              	<button type="button" name="action" class="btn btn-nav btn-continue" onserverclick="submit_Click" id="submitform" runat="server" disabled="disabled">
+		            <span>TERMINAR ENCUESTA</span>
+	            </button>
+            </div>
+		
+            <div class="powered-by-container">
+	        <a class="powered-by">
+		         <img src="Images/M2S%20SandForgetica.png" style="height: auto; width: 80px;" />
+	        </a>
+            </div>
+
+
+	    </div>
+
+     <!--Reference to jQuery-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $("#datepicker").datepicker({
+                    changeMonth: true,
+                    changeYear: true,
+                    yearRange: "-65:+0",
+                    dateFormat: 'dd/mm/yy'
+                });
+            });
+        </script>
+
+    </form>
+</body>
+</html>
+
+
+using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Net.NetworkInformation;
+using System.Threading;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.HtmlControls;
+using System.Web.UI.WebControls;
+using MAHLESurvey.Logic;
+
+
+namespace MAHLESurvey
+{
+    public partial class MAHLESurveyII : System.Web.UI.Page
+    {
+        List<string> questionname = new List<string>();
+        List<string> answerselected = new List<string>();
+
+        public class SurveyQuestion
+        {
+            public int Id { get; set; }
+            public string Pregunta { get; set; }
+            public string Identificador { get; set; }
+            public List<SurveyAnswer> Respuestas { get; set; }
+        }
+
+        public class SurveyAnswer
+        {
+            public string Texto { get; set; }
+            public int Valor { get; set; }
+        }
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetExpires(DateTime.UtcNow.AddHours(-1));
+            Response.Cache.SetNoStore();
+        }
+
+        private void Page_Error(object sender, EventArgs e)
+        {
+            // Get last error from the server.
+            Exception exc = Server.GetLastError();
+            // Pass the error on to the error page.
+            Server.Transfer("ErrorPage.aspx?handler=Page_Error%20-%20Default.aspx",
+            true);
+        }
+
+        protected void findemployee_Click(object sender, EventArgs e)
+        {
+            SQLGetEmployee();
+        }
+
+        protected void submit_Click(object sender, EventArgs e)
+        {
+            if (Page.IsValid)
+            {
+                var result = SQLTasks();
+                if (result == true)
+                {
+                    Server.Transfer("SurveyCompleted.aspx", true);
+                }
+            }
+        }
+
+
+
+        protected void SQLGetEmployee()
+        {
+            string database = "10.93.30.32";
+            SqlConnection sqldatabase = new SqlConnection("Data Source=" + database + ";Database=MAHLESurvey;User=dlocapp;Password=dl0capp;Connection Timeout=3");
+            SqlCommand cmd;
+            Boolean pingdatabase;
+
+            if (database == "(local)")
+            {
+                pingdatabase = true;
+            }
+            else if (HelperFunctions.PingHost(database))
+            {
+                pingdatabase = true;
+            }
+            else
+            {
+                pingdatabase = false;
+            }
+            if (pingdatabase == true)
+            {
+
+                if (sqldatabase.State == System.Data.ConnectionState.Closed)
+                {
+                    sqldatabase.Open();
+                }
+
+                if (sqldatabase.State != 0)
+                {
+                    cmd = new SqlCommand("SELECT COUNT(*) AS rows FROM EmployeesMahle WHERE (NumeroReloj ='" + numeroreloj.Value + "')", sqldatabase);
+                    int recordsfound = (int)cmd.ExecuteScalar();
+                    if (recordsfound > 0)
+                    {
+                        cmd = new SqlCommand("SELECT TOP(1) Nombre, Turno, Puesto, Planta, Area, Sexo, FechaNacimiento, Region FROM EmployeesMahle WHERE (NumeroReloj ='" + numeroreloj.Value + "')", sqldatabase);
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                nombre.InnerText = reader["Nombre"].ToString();
+                                turno.InnerText = reader["Turno"].ToString();
+                                puesto.InnerText = reader["Puesto"].ToString();
+                                planta.InnerText = reader["Planta"].ToString();
+                                region.InnerText = reader["Region"].ToString();
+                                area.InnerText = reader["Area"].ToString();
+                                sexo.InnerText = reader["Sexo"].ToString();
+                                fecha.InnerText = reader["FechaNacimiento"].ToString();
+                            }
+                            reader.Close();
+                        }
+                        validemployee.Visible = true;
+                        validlabel.Visible = true;
+                        validemployee.InnerText = "Si";
+                        numeroreloj.Attributes.Add("style", "background-color:lightgreen");
+                        submitform.Disabled = false;
+                    }
+                    else
+                    {
+                        validemployee.Visible = true;
+                        validlabel.Visible = true;
+                        validemployee.InnerText = "No";
+                        numeroreloj.Attributes.Add("style", "background-color:lightpink");
+                        submitform.Disabled = true;
+                        nombre.InnerText = "";
+                        turno.InnerText = "";
+                        puesto.InnerText = "";
+                        planta.InnerText = "";
+                        region.InnerText = "";
+                        area.InnerText = "";
+                        sexo.InnerText = "";
+                        fecha.InnerText = "";
+                    }
+                }
+            }
+            if (sqldatabase.State == System.Data.ConnectionState.Open)
+            {
+                sqldatabase.Close();
+            }
+        }
+
+
+        protected bool SQLTasks()
+        {
+            string database = "(local)";
+            SqlConnection sqldatabase = new SqlConnection("Data Source=" + database + ";Database=MAHLESurvey;User=dlocapp;Password=dl0capp;Connection Timeout=3");
+            SqlCommand cmd;
+            Boolean pingdatabase;
+
+            if (database == "(local)")
+            {
+                pingdatabase = true;
+            }
+            else if (HelperFunctions.PingHost(database))
+            {
+                pingdatabase = true;
+            }
+            else
+            {
+                pingdatabase = false;
+            }
+            if (pingdatabase == true)
+            {
+
+                if (sqldatabase.State == System.Data.ConnectionState.Closed)
+                {
+                    sqldatabase.Open();
+                }
+
+                if (sqldatabase.State != 0)
+                {
+                    string dateupdate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    cmd = new SqlCommand("SELECT COUNT(*) AS rows FROM SurveyEmployees WHERE (NumeroReloj ='" + numeroreloj.Value + "')", sqldatabase);
+                    int recordsfound = (int)cmd.ExecuteScalar();
+                    if (recordsfound == 0)
+                    {
+                        cmd = new SqlCommand("Insert into SurveyEmployees (NumeroReloj, Nombre, Turno, Puesto, Planta, Area, Sexo, FechaNacimiento, FechaActualizacion, Region) values ('" + numeroreloj.Value + "','" + nombre.InnerText + "','" + turno.InnerText + "','" + puesto.InnerText + "','" + planta.InnerText + "','" + area.InnerText + "','" + sexo.InnerText + "','" + fecha.InnerText + "', '" + dateupdate + "','" + region.InnerText + "')", sqldatabase);
+                        IAsyncResult result = cmd.BeginExecuteNonQuery();
+                        while (true)
+                        {
+                            if (result.IsCompleted)
+                            {
+                                break;
+                            }
+                        }
+                        cmd.EndExecuteNonQuery(result);
+                        if (questionname.Count == answerselected.Count)
+                        {
+                            for (var i = 0; i < questionname.Count; i++)
+                            {
+                                cmd = new SqlCommand("Insert into SurveyResults (NumeroReloj, IdentificadorPregunta, IdentificadorRespuesta, FechaActualizacion, Anexo) values ('" + numeroreloj.Value + "','" + questionname[i] + "','" + answerselected[i] + "', '" + dateupdate + "', '3')", sqldatabase);
+                                IAsyncResult result2 = cmd.BeginExecuteNonQuery();
+                                while (true)
+                                {
+                                    if (result2.IsCompleted)
+                                    {
+                                        break;
+                                    }
+                                }
+                                cmd.EndExecuteNonQuery(result2);
+                            }
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("An InvalidOperationException " +
+                            "occurred in the SQLTasks handler on the MAHLESurvey.aspx page: QUESTIONS COUNT DOES NOT MATCH WITH NUMBER OF ANSWERS.");
+                        }
+
+                    }
+                    else if (recordsfound > 0)
+                    {
+                        if (questionname.Count == answerselected.Count)
+                        {
+                            cmd = new SqlCommand("DELETE FROM SurveyResults WHERE NumeroReloj='" + numeroreloj.Value + "' AND Anexo='3'", sqldatabase);
+                            IAsyncResult result5 = cmd.BeginExecuteNonQuery();
+                            while (true)
+                            {
+                                if (result5.IsCompleted)
+                                {
+                                    break;
+                                }
+                            }
+                            cmd.EndExecuteNonQuery(result5);
+                            for (var i = 0; i < questionname.Count; i++)
+                            {
+                                cmd = new SqlCommand("Insert into SurveyResults (NumeroReloj, IdentificadorPregunta, IdentificadorRespuesta, FechaActualizacion, Anexo) values ('" + numeroreloj.Value + "','" + questionname[i] + "','" + answerselected[i] + "', '" + dateupdate + "', '3')", sqldatabase);
+                                IAsyncResult result2 = cmd.BeginExecuteNonQuery();
+                                while (true)
+                                {
+                                    if (result2.IsCompleted)
+                                    {
+                                        break;
+                                    }
+                                }
+                                cmd.EndExecuteNonQuery(result2);
+                            }
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("An InvalidOperationException " +
+                            "occurred in the SQLTasks handler on the MAHLESurvey.aspx page: QUESTIONS COUNT DOES NOT MATCH WITH NUMBER OF ANSWERS.");
+                        }
+                    }
+                }
+            }
+            if (sqldatabase.State == System.Data.ConnectionState.Open)
+            {
+                sqldatabase.Close();
+            }
+            questionname.Clear();
+            answerselected.Clear();
+            return true;
+        }
+
+        protected List<HtmlInputRadioButton> GetRadioButtonsByGroupName(Control parentControl, string groupName)
+        {
+            List<HtmlInputRadioButton> result = new List<HtmlInputRadioButton>();
+            GetRadioButtonsByGroupName(parentControl, groupName, result);
+            return result;
+        }
+
+        protected void GetRadioButtonsByGroupName(Control parentControl, string groupName, List<HtmlInputRadioButton> list)
+        {
+            foreach (Control c in parentControl.Controls)
+            {
+                if (c is HtmlInputRadioButton && ((HtmlInputRadioButton)c).Name.Equals(groupName))
+                {
+                    list.Add(c as HtmlInputRadioButton);
+                }
+                else if (c.HasControls())
+                {
+                    GetRadioButtonsByGroupName(c, groupName, list);
+                }
+            }
+        }
+
+        protected void CustomValidator_ServerValidate(object source, ServerValidateEventArgs args)
+        {
+            var questionnumber = surveyForm.Controls.GetRadioButtonGroup();
+            bool questionvalidation = true;
+            bool optionalquestions = false;
+            if (validemployee.InnerText == "Si")
+            {
+                foreach (string c in questionnumber)
+                {
+                    HtmlInputRadioButton SelectedRadioButton = (HtmlInputRadioButton)GetRadioButtonsByGroupName(this, c).FirstOrDefault(x => x.Checked);
+                    string questiontofind = c.Replace("[", "").Replace("]", "");
+                    HtmlTableCell questioncolor = (HtmlTableCell)this.FindControl(questiontofind);
+                    questioncolor.Attributes.Add("style", "background-color:");
+                    if (SelectedRadioButton == null)
+                    {
+                        if (c == "question[7]" || c == "question[8]" || c == "question[9]" || c == "question[10]" || c == "question[11]" || c == "question[12]" || c == "question[13]" ||
+                            c == "question[14]" || c == "question[15]" || c == "question[16]" || c == "question[17]" || c == "question[18]" || c == "question[19]" || c == "question[20]")
+                        {
+                            if (optionalquestions == true)
+                            {
+                                questioncolor.Attributes.Add("style", "background-color:orange");
+                                questionvalidation = false;
+                            }
+
+                        }
+                        else
+                        {
+                            questioncolor.Attributes.Add("style", "background-color:orange");
+                            questionvalidation = false;
+                        }
+                    }
+                    else
+                    {
+                        if ((c == "question[1]" || c == "question[2]" || c == "question[3]" || c == "question[4]" || c == "question[5]" || c == "question[6]") && SelectedRadioButton.Value == "6")
+                        {
+                            optionalquestions = true;
+                        }
+                    }
+                    if (SelectedRadioButton != null && questionvalidation == true)
+                    {
+                        questionname.Add(SelectedRadioButton.Name);
+                        answerselected.Add(SelectedRadioButton.Value);
+                    }
+                }
+            }
+            else
+            {
+                questionvalidation = false;
+            }
+            args.IsValid = questionvalidation;
+            }
+        }
+}
+
+
+Site.Master:
+
+<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="MAHLESurvey.SiteMaster" %>
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%: Page.Title %> - MAHLE</title>
+
+    <asp:PlaceHolder runat="server">
+        <%: Scripts.Render("~/bundles/modernizr") %>
+    </asp:PlaceHolder>
+
+    <webopt:bundlereference runat="server" path="~/Content/css" />
+        <link href="~/Images/MahleIcoSH.ico" rel="shortcut icon" type="image/x-icon" />
+
+  <style type="text/css">
+      .auto-style1 {
+            width: 226px;
+            height: 50px;
+        }
+
+        a {
+            padding-left: 125px;
+            padding-top: 125px;
+            line-height: normal;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        a:link {
+            padding-left: 25px;
+            padding-top: 25px;
+            color: white;
+        }
+
+        a:visited {
+          color: white;
+        }
+
+        a:hover {
+          color: lightgrey;
+
+        }
+
+        a:active {
+          color: white;
+        }
+
+        label {
+        display: inline-block;
+        width: 200px;
+        }
+
+        input {
+            width: 300px;
+        }
+
+        body .aspbtn .rtIn {
+              height: 30px;
+              line-height: 0px;
+              text-align: center;
+        }
+
+        .btn{
+              height: 30px;
+              line-height: 0px;
+              text-align: center;
+        }
+        
+    </style>
+
+</head>
+<body>
+    <form runat="server">
+        <asp:ScriptManager runat="server">
+            <Scripts>
+                <%--Framework Scripts--%>
+                <asp:ScriptReference Name="MsAjaxBundle" />
+                <asp:ScriptReference Name="jquery" />
+                <asp:ScriptReference Name="bootstrap" />
+                <asp:ScriptReference Name="WebForms.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebForms.js" />
+                <asp:ScriptReference Name="WebUIValidation.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebUIValidation.js" />
+                <asp:ScriptReference Name="MenuStandards.js" Assembly="System.Web" Path="~/Scripts/WebForms/MenuStandards.js" />
+                <asp:ScriptReference Name="GridView.js" Assembly="System.Web" Path="~/Scripts/WebForms/GridView.js" />
+                <asp:ScriptReference Name="DetailsView.js" Assembly="System.Web" Path="~/Scripts/WebForms/DetailsView.js" />
+                <asp:ScriptReference Name="TreeView.js" Assembly="System.Web" Path="~/Scripts/WebForms/TreeView.js" />
+                <asp:ScriptReference Name="WebParts.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebParts.js" />
+                <asp:ScriptReference Name="Focus.js" Assembly="System.Web" Path="~/Scripts/WebForms/Focus.js" />
+                <asp:ScriptReference Name="WebFormsBundle" />
+                <%--Site Scripts--%>
+            </Scripts>
+        </asp:ScriptManager>
+
+        <div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <img src="Images/MahleMDWB.png" />
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a runat="server" href="~/">Inicio</a></li>
+                        <li><a runat="server" href="~/ExcelExport">Obtener reporte</a></li>
+                        <li><a runat="server" href="~/About">Acerca</a></li>
+                        <li><a runat="server" href="~/Contact">Contacto</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="container body-content">
+            <asp:ContentPlaceHolder ID="MainContent" runat="server">
+            </asp:ContentPlaceHolder>
+            <hr />
+            <footer>
+                <p><%: DateTime.Now.Year %> - © MAHLE</p>
+                <p>Esta página esta diseñada para funcionar en los navegadores IE, Edge y Chrome.</p>
+            </footer>
+        </div>
+    </form>
+</body>
+</html>
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+namespace MAHLESurvey
+{
+    public partial class SiteMaster : MasterPage
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
+
+
+SurveyCompleted.aspx:
+
+<%@ Page Title="" Language="C#" AutoEventWireup="true" MasterPageFile="~/Site.Master" CodeBehind="SurveyCompleted.aspx.cs" Inherits="MAHLESurvey.SurveyCompleted" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
+
+    <div class="jumbotron">
+        <h2>Ha completado el cuestionario, gracias por participar.</h2>
+        <p><a href="Default.aspx" class="btn btn-primary btn-lg">Regresar a página de inicio &raquo;</a></p>
+    </div>
+
+</asp:Content>
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+namespace MAHLESurvey
+{
+    public partial class SurveyCompleted : System.Web.UI.Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetExpires(DateTime.UtcNow.AddHours(-1));
+            Response.Cache.SetNoStore();
+        } 
+    }
+}
+
+
+
+Eso seria casi todo, creo que con eso puedes hacerme de nuevo el Sistema, pero ahora para .net core 8. Ahora, lo de las encuestas sirve perfecto, y que apunten exactamente a donde mismo, lo mas importante es simplificar todo y sobre todo, hacer que los reports funcionen, tanto la descarga de excel como hacer graficas y reports necesarios, me explico? VAMOS CON TODO!
+
+
