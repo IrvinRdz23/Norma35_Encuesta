@@ -1,0 +1,49 @@
+@model AnexoIViewModel
+@inject IOptions<SurveyOptions> Opt
+@{
+    ViewData["Title"] = "Anexo I";
+    var yes = Opt.Value.YesValue; var no = Opt.Value.NoValue;
+}
+
+<div class="page-head">
+    <a asp-controller="Home" asp-action="Index" class="back-link"><i class="bi bi-arrow-left"></i> Regresar</a>
+    <h1>Anexo I</h1>
+    <p>Cuestionario para identificar a los trabajadores que fueron sujetos a acontecimientos traumáticos severos.</p>
+</div>
+
+<form method="post" id="surveyForm" data-yes="@yes" data-no="@no" novalidate>
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+    <partial name="_EmployeeCard" model="Model" />
+
+    @foreach (var s in AnexoIDefinition.Sections)
+    {
+        <section class="card-panel">
+            <h2 class="panel-title">@s.Title</h2>
+            @if (s.Intro is not null) { <p class="text-muted">@s.Intro</p> }
+            @if (s.Conditional && s == AnexoIDefinition.Sections[1])
+            {
+                <div class="notice">Si todas las respuestas de la sección I son «No», no es necesario responder las siguientes preguntas.</div>
+            }
+            @foreach (var q in s.Questions)
+            {
+                var chosen = Model.Answers.TryGetValue(q.Id, out var v) ? v : (int?)null;
+                var yesChecked = chosen == yes; var noChecked = chosen == no;
+                <div class="q-item @(Model.Missing.Contains(q.Id) ? "missing" : "")" data-qid="@q.Id"
+                     data-requires="@(s.Conditional ? "any-yes:" + string.Join(",", AnexoIDefinition.GateIds) : "")">
+                    <div class="q-text"><span class="q-num">@q.Id</span><span>@q.Text</span></div>
+                    <div class="q-options">
+                        <input type="radio" class="btn-check" name="Answers[@q.Id]" id="a@(q.Id)_y" value="@yes" checked="@yesChecked" />
+                        <label class="pill" for="a@(q.Id)_y">Sí</label>
+                        <input type="radio" class="btn-check" name="Answers[@q.Id]" id="a@(q.Id)_n" value="@no" checked="@noChecked" />
+                        <label class="pill" for="a@(q.Id)_n">No</label>
+                    </div>
+                </div>
+            }
+        </section>
+    }
+
+    <partial name="_SubmitBar" />
+</form>
+
+@section Scripts { <script src="~/js/survey.js" asp-append-version="true"></script> }

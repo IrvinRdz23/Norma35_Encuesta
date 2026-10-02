@@ -1,0 +1,36 @@
+@{ ViewData["Title"] = "Importar respuestas"; }
+
+<div class="page-head">
+    <h1>Importar respuestas</h1>
+    <p>Cargue el concentrado de respuestas capturadas en Excel.</p>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="card-panel">
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+    <h2 class="panel-title">Formato del archivo</h2>
+    <ul class="text-muted">
+        <li>Archivo <strong>.xlsx</strong>, primera hoja, con encabezados en la fila 1.</li>
+        <li>Columna <strong>C</strong>: número de reloj (8 dígitos).</li>
+        <li>Columnas <strong>J</strong> a <strong>CC</strong>: una respuesta por pregunta (Siempre, Casi siempre, Algunas veces, Casi nunca, Nunca, Sí, No).</li>
+        <li>Si un empleado ya tiene respuestas importadas, se reemplazan con las del archivo.</li>
+    </ul>
+
+    <label for="file" class="dropzone" id="drop">
+        <i class="bi bi-cloud-arrow-up"></i>
+        <span id="fileName">Elija un archivo .xlsx o arrástrelo aquí</span>
+        <input id="file" name="file" type="file" accept=".xlsx" hidden />
+    </label>
+
+    <div class="mt-3"><button class="btn btn-primary btn-lg" type="submit">Importar archivo</button></div>
+</form>
+
+@section Scripts {
+<script>
+    const f = document.getElementById('file'), n = document.getElementById('fileName'), d = document.getElementById('drop');
+    f.addEventListener('change', () => n.textContent = f.files[0]?.name ?? 'Elija un archivo .xlsx o arrástrelo aquí');
+    ['dragover','dragenter'].forEach(e => d.addEventListener(e, ev => { ev.preventDefault(); d.classList.add('over'); }));
+    ['dragleave','drop'].forEach(e => d.addEventListener(e, ev => { ev.preventDefault(); d.classList.remove('over'); }));
+    d.addEventListener('drop', ev => { f.files = ev.dataTransfer.files; f.dispatchEvent(new Event('change')); });
+</script>
+}

@@ -1,0 +1,25 @@
+@model ImportResult
+@{ ViewData["Title"] = "Importación terminada"; }
+
+<section class="card-panel">
+    <h1 class="h3"><i class="bi bi-check-circle-fill done-icon sm"></i> Archivo importado</h1>
+    <div class="kpis mt-3">
+        <div class="kpi"><span class="kpi-v">@Model.Empleados.ToString("N0")</span><span class="kpi-l">Empleados procesados</span></div>
+        <div class="kpi"><span class="kpi-v">@Model.Filas.ToString("N0")</span><span class="kpi-l">Respuestas guardadas</span></div>
+        <div class="kpi"><span class="kpi-v">@Model.Advertencias.Count.ToString("N0")</span><span class="kpi-l">Advertencias</span></div>
+    </div>
+
+    @if (Model.Advertencias.Count > 0)
+    {
+        <h2 class="panel-title mt-4">Advertencias</h2>
+        <ul class="small text-muted">
+            @foreach (var a in Model.Advertencias.Take(50)) { <li>@a</li> }
+        </ul>
+        @if (Model.Advertencias.Count > 50) { <p class="small text-muted">…y @(Model.Advertencias.Count - 50) más.</p> }
+    }
+
+    <div class="mt-3 d-flex gap-2">
+        <a class="btn btn-primary" asp-controller="Reports" asp-action="Index">Ver reportes</a>
+        <a class="btn btn-outline-secondary" asp-action="Index">Importar otro archivo</a>
+    </div>
+</section>

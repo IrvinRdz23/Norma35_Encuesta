@@ -1,0 +1,28 @@
+@{ ViewData["Title"] = "Inicio"; }
+
+<section class="hero">
+    <h1>Evaluación de factores de riesgo psicosocial</h1>
+    <p>Responda con calma y con sinceridad. Sus respuestas son confidenciales y se utilizan para mejorar el entorno de trabajo.</p>
+</section>
+
+<div class="row g-4 mt-1">
+    <div class="col-lg-6">
+        <article class="choice h-100">
+            <h2>Anexo I</h2>
+            <p>Cuestionario para identificar a los trabajadores que fueron sujetos a acontecimientos traumáticos severos.</p>
+            <a class="btn btn-primary btn-lg" asp-controller="Survey" asp-action="AnexoI">Empezar el Anexo I</a>
+        </article>
+    </div>
+    <div class="col-lg-6">
+        <article class="choice h-100">
+            <h2>Anexo III</h2>
+            <p>Cuestionario para identificar los factores de riesgo psicosocial y evaluar el entorno organizacional en los centros de trabajo.</p>
+            <a class="btn btn-primary btn-lg" asp-controller="Survey" asp-action="AnexoIII">Empezar el Anexo III</a>
+        </article>
+    </div>
+</div>
+
+<section class="card-panel mt-4">
+    <h2 class="panel-title">NOM-035-STPS-2018</h2>
+    <p class="mb-0 text-muted">Factores de riesgo psicosocial en el trabajo: identificación, análisis y prevención.</p>
+</section>

@@ -1,0 +1,25 @@
+@model SurveyViewModel
+<section class="card-panel">
+    <h2 class="panel-title"><i class="bi bi-person-badge"></i> Datos del empleado</h2>
+    <div class="row g-3">
+        <div class="col-md-6 col-lg-5">
+            <label for="NumeroReloj" class="form-label">Número de reloj</label>
+            <div class="input-group">
+                <input id="NumeroReloj" name="NumeroReloj" class="form-control form-control-lg"
+                       inputmode="numeric" maxlength="8" autocomplete="off" value="@Model.NumeroReloj" placeholder="8 dígitos" />
+                <button type="button" id="btnBuscar" class="btn btn-primary">Buscar</button>
+            </div>
+            <div id="lookupMsg" class="form-text" role="status"></div>
+        </div>
+    </div>
+    <dl id="employeeData" class="employee-grid @(Model.Employee is null ? "d-none" : "")">
+        <div><dt>Nombre</dt><dd data-f="nombre">@Model.Employee?.Nombre</dd></div>
+        <div><dt>Turno</dt><dd data-f="turno">@Model.Employee?.Turno</dd></div>
+        <div><dt>Puesto</dt><dd data-f="puesto">@Model.Employee?.Puesto</dd></div>
+        <div><dt>Área</dt><dd data-f="area">@Model.Employee?.Area</dd></div>
+        <div><dt>Planta</dt><dd data-f="planta">@Model.Employee?.Planta</dd></div>
+        <div><dt>Código planta</dt><dd data-f="region">@Model.Employee?.Region</dd></div>
+        <div><dt>Sexo</dt><dd data-f="sexo">@Model.Employee?.Sexo</dd></div>
+        <div><dt>Fecha de nacimiento</dt><dd data-f="fechaNacimiento">@Model.Employee?.FechaTexto</dd></div>
+    </dl>
+</section>

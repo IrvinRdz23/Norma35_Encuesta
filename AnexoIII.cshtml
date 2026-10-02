@@ -1,0 +1,46 @@
+@model AnexoIIIViewModel
+@inject IOptions<SurveyOptions> Opt
+@{
+    ViewData["Title"] = "Anexo III";
+    var yes = Opt.Value.YesValue; var no = Opt.Value.NoValue;
+    var n = 0;
+}
+
+<div class="page-head">
+    <a asp-controller="Home" asp-action="Index" class="back-link"><i class="bi bi-arrow-left"></i> Regresar</a>
+    <h1>Anexo III</h1>
+    <p>Cuestionario para identificar los factores de riesgo psicosocial y evaluar el entorno organizacional en los centros de trabajo.</p>
+</div>
+
+<form method="post" id="surveyForm" data-yes="@yes" data-no="@no" novalidate>
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+    <partial name="_EmployeeCard" model="Model" />
+
+    <section class="card-panel">
+        <h2 class="panel-title">Condiciones de su centro de trabajo</h2>
+        <p class="text-muted">Para responder las preguntas siguientes considere las condiciones ambientales de su centro de trabajo.</p>
+
+        @foreach (var q in Model.Questions)
+        {
+            n++;
+            var chosen = Model.Answers.TryGetValue(q.Id, out var v) ? v : (int?)null;
+            var requires = Model.DependentOf.TryGetValue(q.Id, out var gate) ? $"yes:{gate}" : "";
+            <div class="q-item @(Model.Missing.Contains(q.Id) ? "missing" : "")" data-qid="@q.Id" data-requires="@requires">
+                <div class="q-text"><span class="q-num">@n</span><span>@q.Texto</span></div>
+                <div class="q-options">
+                    @foreach (var o in q.Options)
+                    {
+                        var isChecked = chosen == o.Value;
+                        <input type="radio" class="btn-check" name="Answers[@q.Id]" id="a@(q.Id)_@o.Value" value="@o.Value" checked="@isChecked" />
+                        <label class="pill" for="a@(q.Id)_@o.Value">@o.Text</label>
+                    }
+                </div>
+            </div>
+        }
+    </section>
+
+    <partial name="_SubmitBar" />
+</form>
+
+@section Scripts { <script src="~/js/survey.js" asp-append-version="true"></script> }

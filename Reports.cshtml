@@ -1,0 +1,56 @@
+@model List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>
+@{ ViewData["Title"] = "Reportes"; }
+
+@section Styles { <link rel="stylesheet" href="~/css/reports.css" asp-append-version="true" /> }
+
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-3">
+    <div class="page-head mb-0">
+        <h1>Reportes</h1>
+        <p class="mb-0">Participación, respuestas y niveles de riesgo de las encuestas NOM-035.</p>
+    </div>
+    <div class="d-flex gap-2 no-print">
+        <button type="button" class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer"></i> Imprimir</button>
+        <a id="btnExport" class="btn btn-success" href="/Reports/Export"><i class="bi bi-file-earmark-excel"></i> Descargar Excel</a>
+    </div>
+</div>
+
+@if (TempData["Error"] is string err) { <div class="alert alert-warning">@err</div> }
+
+<section class="card-panel filters no-print">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-5">
+            <label class="form-label" for="fAnexo">Anexo</label>
+            <select id="fAnexo" class="form-select">
+                <option value="">Todos</option>
+                @foreach (var i in Model) { <option value="@i.Value">@i.Text</option> }
+            </select>
+        </div>
+        <div class="col-6 col-md-3"><label class="form-label" for="fDesde">Desde</label><input id="fDesde" type="date" class="form-control" /></div>
+        <div class="col-6 col-md-3"><label class="form-label" for="fHasta">Hasta</label><input id="fHasta" type="date" class="form-control" /></div>
+        <div class="col-md-1 d-grid"><button id="btnApply" class="btn btn-primary" type="button">Aplicar</button></div>
+    </div>
+</section>
+
+<div id="status" class="text-muted my-3" role="status"></div>
+
+<div class="kpis" id="kpis">
+    <div class="kpi"><span class="kpi-v" id="kEmpleados">–</span><span class="kpi-l">Empleados encuestados</span></div>
+    <div class="kpi"><span class="kpi-v" id="kCobertura">–</span><span class="kpi-l">Cobertura de la plantilla</span></div>
+    <div class="kpi"><span class="kpi-v" id="kRespuestas">–</span><span class="kpi-l">Respuestas registradas</span></div>
+    <div class="kpi"><span class="kpi-v" id="kUltima">–</span><span class="kpi-l">Última captura</span></div>
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-lg-7"><section class="card-panel chart-card"><h2 class="panel-title">Cobertura por área</h2><div class="chart-box" style="height:360px"><canvas id="chArea"></canvas></div><button class="btn btn-sm btn-link no-print dl" data-chart="chArea">Descargar imagen</button></section></div>
+    <div class="col-lg-5"><section class="card-panel chart-card"><h2 class="panel-title">Encuestados por turno</h2><div class="chart-box" style="height:360px"><canvas id="chTurno"></canvas></div><button class="btn btn-sm btn-link no-print dl" data-chart="chTurno">Descargar imagen</button></section></div>
+    <div class="col-lg-7"><section class="card-panel chart-card"><h2 class="panel-title">Captura por día</h2><div class="chart-box" style="height:300px"><canvas id="chDia"></canvas></div><button class="btn btn-sm btn-link no-print dl" data-chart="chDia">Descargar imagen</button></section></div>
+    <div class="col-lg-5"><section class="card-panel chart-card"><h2 class="panel-title">Distribución de respuestas</h2><div class="chart-box" style="height:300px"><canvas id="chDist"></canvas></div><button class="btn btn-sm btn-link no-print dl" data-chart="chDist">Descargar imagen</button></section></div>
+    <div class="col-lg-6" id="riesgoCol"><section class="card-panel chart-card"><h2 class="panel-title">Anexo III · Nivel de riesgo por empleado</h2><div class="chart-box" style="height:300px"><canvas id="chRiesgo"></canvas></div><button class="btn btn-sm btn-link no-print dl" data-chart="chRiesgo">Descargar imagen</button></section></div>
+    <div class="col-lg-6" id="anexoICol"><section class="card-panel chart-card"><h2 class="panel-title">Anexo I · Acontecimientos traumáticos severos</h2><div id="anexoISummary" class="anexo-i"></div><p class="text-muted small mb-0">Se muestran sólo totales. Los casos identificados deben canalizarse a valoración clínica de forma confidencial, conforme a la NOM-035.</p></section></div>
+    <div class="col-12" id="preguntasCol"><section class="card-panel chart-card"><h2 class="panel-title">Perfil de respuestas por pregunta</h2><div class="chart-box scroll-y" id="qWrap"><canvas id="chPreg"></canvas></div><button class="btn btn-sm btn-link no-print dl" data-chart="chPreg">Descargar imagen</button></section></div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/chart.js/dist/chart.umd.js"></script>
+    <script src="~/js/reports.js" asp-append-version="true"></script>
+}

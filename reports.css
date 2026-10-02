@@ -1,0 +1,17 @@
+.filters .form-label { font-size: .85rem; color: var(--muted); margin-bottom: .25rem; }
+.chart-card { position: relative; }
+.chart-card .panel-title { margin-bottom: .75rem; }
+.chart-box { position: relative; width: 100%; }
+.chart-box.scroll-y { max-height: 640px; overflow-y: auto; }
+.chart-card .dl { position: absolute; top: .9rem; right: 1rem; font-size: .8rem; text-decoration: none; }
+.anexo-i { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.anexo-i .big { font-size: 2.6rem; font-weight: 700; color: var(--navy); line-height: 1; }
+.anexo-i .of { color: var(--muted); }
+.empty-note { color: var(--muted); padding: 2rem 0; text-align: center; }
+
+@media print {
+  .no-print, .site-nav, .site-footer { display: none !important; }
+  body { background: #fff; }
+  .card-panel, .kpi { break-inside: avoid; border-color: #ccc; }
+  .chart-box.scroll-y { max-height: none; overflow: visible; }
+}
