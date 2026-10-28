@@ -28,12 +28,17 @@ ORDER BY q.id";
         return (await c.QueryAsync<QRow>(sql, new { anexo })).ToList();
     }
 
-    /// <summary>Preguntas del Anexo III. Busca primero con QuestionsAnexoFilter y, si no hay, con AnexoIIICode.</summary>
+    /// <summary>Preguntas del Anexo III: SurveyQuestions.Anexo = AnexoIIICode (el mismo código que SurveyResults).</summary>
     private async Task<List<QRow>> LoadAnexoIIIRowsAsync()
     {
-        var rows = await LoadQuestionRowsAsync(O.QuestionsAnexoFilter);
-        if (rows.Count == 0 && O.QuestionsAnexoFilter != O.AnexoIIICode)
-            rows = await LoadQuestionRowsAsync(O.AnexoIIICode);
+        var rows = await LoadQuestionRowsAsync(O.AnexoIIICode);
+        if (rows.Count == 0)
+        {
+            await using var c = factory.Create();
+            var disponibles = await c.QueryAsync<string>("SELECT DISTINCT CAST(Anexo AS nvarchar(20)) FROM SurveyQuestions");
+            log.LogWarning("SurveyQuestions no tiene preguntas con Anexo = '{Code}'. Valores existentes: {Valores}",
+                O.AnexoIIICode, string.Join(", ", disponibles));
+        }
         return rows;
     }
 
@@ -82,11 +87,15 @@ ORDER BY q.id";
         var a3 = new Dictionary<int, string>();
         try
         {
-            foreach (var r in await LoadAnexoIIIRowsAsync())
-                if (!string.IsNullOrWhiteSpace(r.Pregunta)) a3.TryAdd(r.Id, r.Pregunta.Trim());
+            var rows = (await LoadAnexoIIIRowsAsync()).OrderBy(x => x.Id).ToList();
+            // Las respuestas se numeran 1..74. Si los ids de SurveyQuestions empiezan en 1 coinciden con ese número;
+            // si no, se usa la posición de la pregunta dentro del anexo.
+            var porId = rows.Count > 0 && rows[0].Id == 1;
+            for (var i = 0; i < rows.Count; i++)
+                if (!string.IsNullOrWhiteSpace(rows[i].Pregunta))
+                    a3.TryAdd(porId ? rows[i].Id : i + 1, rows[i].Pregunta!.Trim());
         }
         catch (Exception ex) { log.LogError(ex, "No se pudo leer SurveyQuestions; los encabezados usarán 'Pregunta n'"); }
-        if (a3.Count == 0) log.LogWarning("SurveyQuestions no devolvió preguntas para Anexo '{F}' ni '{C}'", O.QuestionsAnexoFilter, O.AnexoIIICode);
 
         catalog.TryAdd(O.AnexoIIICode, a3);
         catalog.TryAdd(O.ExcelImportCode, a3);
