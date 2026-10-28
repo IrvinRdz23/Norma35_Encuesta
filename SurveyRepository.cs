@@ -6,7 +6,7 @@ using MahleSurvey.Options;
 
 namespace MahleSurvey.Services;
 
-public class SurveyRepository(IDbConnectionFactory factory, IOptions<SurveyOptions> options)
+public class SurveyRepository(IDbConnectionFactory factory, IOptions<SurveyOptions> options, ILogger<SurveyRepository> log)
 {
     private SurveyOptions O => options.Value;
 
@@ -85,7 +85,8 @@ ORDER BY q.id";
             foreach (var r in await LoadAnexoIIIRowsAsync())
                 if (!string.IsNullOrWhiteSpace(r.Pregunta)) a3.TryAdd(r.Id, r.Pregunta.Trim());
         }
-        catch { /* sin catálogo: los encabezados usan "Pregunta n" */ }
+        catch (Exception ex) { log.LogError(ex, "No se pudo leer SurveyQuestions; los encabezados usarán 'Pregunta n'"); }
+        if (a3.Count == 0) log.LogWarning("SurveyQuestions no devolvió preguntas para Anexo '{F}' ni '{C}'", O.QuestionsAnexoFilter, O.AnexoIIICode);
 
         catalog.TryAdd(O.AnexoIIICode, a3);
         catalog.TryAdd(O.ExcelImportCode, a3);

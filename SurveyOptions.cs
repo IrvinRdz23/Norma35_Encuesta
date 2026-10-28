@@ -2,10 +2,10 @@ namespace MahleSurvey.Options;
 
 public class SurveyOptions
 {
-    /// <summary>Valor de SurveyResults.Anexo del Anexo I.</summary>
-    public string AnexoICode { get; set; } = "1";
-    /// <summary>Valor de SurveyResults.Anexo del Anexo III.</summary>
-    public string AnexoIIICode { get; set; } = "3";
+    /// <summary>Valor de SurveyResults.Anexo del Anexo I (en la BD actual: "3").</summary>
+    public string AnexoICode { get; set; } = "3";
+    /// <summary>Valor de SurveyResults.Anexo del Anexo III, 74 preguntas (en la BD actual: "1").</summary>
+    public string AnexoIIICode { get; set; } = "1";
     /// <summary>Valor de SurveyResults.Anexo que usa la importación desde Excel (legacy: "3").</summary>
     public string ExcelImportCode { get; set; } = "3";
     /// <summary>Filtro SurveyQuestions.Anexo para cargar las preguntas del Anexo III (legacy: "1").</summary>
