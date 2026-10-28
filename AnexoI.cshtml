@@ -6,13 +6,13 @@
 }
 
 <div class="page-head">
-    <a asp-controller="Home" asp-action="Index" class="back-link"><i class="bi bi-arrow-left"></i> Regresar</a>
+    <a asp-controller="Home" asp-action="Index" class="back-link">@Icons.ArrowLeft Regresar</a>
     <h1>Anexo I</h1>
     <p>Cuestionario para identificar a los trabajadores que fueron sujetos a acontecimientos traumáticos severos.</p>
 </div>
 
 <form method="post" id="surveyForm" data-yes="@yes" data-no="@no" novalidate>
-    <div asp-validation-summary="All" class="alert alert-danger"></div>
+    <partial name="_Errors" />
 
     <partial name="_EmployeeCard" model="Model" />
 

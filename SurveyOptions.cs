@@ -2,10 +2,10 @@ namespace MahleSurvey.Options;
 
 public class SurveyOptions
 {
-    /// <summary>Valor de SurveyResults.Anexo que usa hoy el formulario Anexo I (legacy: "3").</summary>
-    public string AnexoICode { get; set; } = "3";
-    /// <summary>Valor de SurveyResults.Anexo que usa hoy el formulario Anexo III (legacy: "1").</summary>
-    public string AnexoIIICode { get; set; } = "1";
+    /// <summary>Valor de SurveyResults.Anexo del Anexo I.</summary>
+    public string AnexoICode { get; set; } = "1";
+    /// <summary>Valor de SurveyResults.Anexo del Anexo III.</summary>
+    public string AnexoIIICode { get; set; } = "3";
     /// <summary>Valor de SurveyResults.Anexo que usa la importación desde Excel (legacy: "3").</summary>
     public string ExcelImportCode { get; set; } = "3";
     /// <summary>Filtro SurveyQuestions.Anexo para cargar las preguntas del Anexo III (legacy: "1").</summary>
@@ -24,8 +24,14 @@ public class SurveyOptions
     public RiskThresholds Risk { get; set; } = new();
     public Dictionary<string, string> AnexoLabels { get; set; } = new();
 
-    public string LabelFor(string code) =>
-        AnexoLabels.TryGetValue(code, out var l) ? l : $"Anexo (código {code})";
+    /// <summary>Nombre legible de un código de anexo, según la configuración (AnexoICode / AnexoIIICode / ExcelImportCode).</summary>
+    public string LabelFor(string code)
+    {
+        if (AnexoLabels.TryGetValue(code, out var l)) return l;
+        if (code == AnexoICode) return "Anexo I";
+        if (code == AnexoIIICode || code == ExcelImportCode) return "Anexo III";
+        return $"Anexo (código {code})";
+    }
 }
 
 public class Gate

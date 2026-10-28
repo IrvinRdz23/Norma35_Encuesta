@@ -25,6 +25,11 @@ body {
 main { flex: 1; }
 h1, h2, h3 { letter-spacing: -0.01em; }
 
+/* Íconos SVG en línea */
+.ico { width: 1.1em; height: 1.1em; vertical-align: -.17em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.btn .ico { margin-right: .4rem; }
+
 /* Navegación */
 .site-nav { background: var(--navy); }
 .site-nav .nav-link { color: #c9d7e6; padding: .9rem 1rem; border-bottom: 3px solid transparent; }
@@ -41,7 +46,7 @@ h1, h2, h3 { letter-spacing: -0.01em; }
   margin-bottom: 1.25rem;
 }
 .panel-title { font-size: 1.1rem; font-weight: 650; color: var(--navy); margin-bottom: 1rem; }
-.panel-title .bi { margin-right: .4rem; color: var(--blue); }
+.panel-title .ico { margin-right: .4rem; color: var(--blue); }
 .lead-text { font-size: 1.1rem; max-width: 70ch; }
 
 .page-head { margin-bottom: 1.25rem; }
@@ -94,12 +99,12 @@ h1, h2, h3 { letter-spacing: -0.01em; }
 .progress-bar { background: var(--ok); transition: width .25s; }
 
 /* Finalizado */
-.done-icon { font-size: 4rem; color: var(--ok); }
-.done-icon.sm { font-size: 1.6rem; vertical-align: -3px; }
+.done-icon { width: 4rem; height: 4rem; color: var(--ok); }
+.done-icon.sm { width: 1.6rem; height: 1.6rem; vertical-align: -4px; }
 
 /* Importar */
 .dropzone { display: grid; place-items: center; gap: .25rem; padding: 2.5rem 1rem; border: 2px dashed #b4c4d6; border-radius: var(--radius); background: #fafcfe; cursor: pointer; text-align: center; color: var(--muted); transition: .15s; width: 100%; }
-.dropzone .bi { font-size: 2rem; color: var(--blue); }
+.dropzone .ico { width: 2rem; height: 2rem; color: var(--blue); }
 .dropzone:hover, .dropzone.over { border-color: var(--blue); background: var(--blue-soft); }
 
 /* KPIs (compartido con reportes) */

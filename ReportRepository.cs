@@ -9,8 +9,7 @@ namespace MahleSurvey.Services;
 public class ReportRepository(IDbConnectionFactory factory, IOptions<SurveyOptions> options, SurveyRepository surveys)
 {
     private SurveyOptions O => options.Value;
-
-    // Compatible con SQL Server < 2012 (sin TRY_CONVERT)
+    // Compatible con SQL Server sin TRY_CONVERT (nivel de compatibilidad < 110)
     private const string Fecha =
         "(CASE WHEN ISDATE(r.FechaActualizacion) = 1 THEN CONVERT(datetime, r.FechaActualizacion, 121) END)";
 
@@ -19,6 +18,8 @@ public class ReportRepository(IDbConnectionFactory factory, IOptions<SurveyOptio
         (withAnexo ? "AND (@anexo IS NULL OR r.Anexo = @anexo) " : "") +
         $"AND (@desde IS NULL OR {Fecha} >= @desde) " +
         $"AND (@hasta IS NULL OR {Fecha} < DATEADD(day, 1, @hasta))";
+
+    public Task<Dictionary<string, Dictionary<int, string>>> GetCatalogAsync() => surveys.GetQuestionCatalogAsync();
 
     public async Task<List<string>> GetAnexosAsync()
     {
@@ -59,7 +60,7 @@ public class ReportRepository(IDbConnectionFactory factory, IOptions<SurveyOptio
                FROM SurveyResults r {w}
                GROUP BY r.Anexo, r.IdentificadorPregunta, r.IdentificadorRespuesta", p);
 
-        var texts = await surveys.GetQuestionTextsAsync();
+        var catalog = await surveys.GetQuestionCatalogAsync();
         var global = new Dictionary<string, int>();
         var perQ = new Dictionary<(string, int), QuestionStat>();
 
@@ -73,9 +74,7 @@ public class ReportRepository(IDbConnectionFactory factory, IOptions<SurveyOptio
 
             if (!perQ.TryGetValue((an, num.Value), out var qs))
             {
-                var texto = an == O.AnexoICode && an != O.ExcelImportCode
-                    ? AnexoIDefinition.All.FirstOrDefault(x => x.Id == num.Value)?.Text
-                    : texts.GetValueOrDefault(num.Value);
+                var texto = catalog.GetValueOrDefault(an)?.GetValueOrDefault(num.Value);
                 qs = new QuestionStat { Anexo = an, Numero = num.Value, Texto = texto };
                 perQ[(an, num.Value)] = qs;
             }
@@ -86,12 +85,11 @@ public class ReportRepository(IDbConnectionFactory factory, IOptions<SurveyOptio
             .Select(l => new LabelCount { Etiqueta = l, Valor = global[l] }).ToList();
         d.Preguntas = perQ.Values.OrderBy(x => x.Anexo).ThenBy(x => x.Numero).ToList();
 
-        // Niveles de riesgo (Anexo III): deshabilitado hasta confirmar de dónde salen los puntos
-        // (no existen ResponseValues ni SurveyResults.ValorRespuesta en esta BD). d.Riesgo queda vacío
-        // y la gráfica y la hoja de Excel correspondientes se ocultan solas.
+        // Nivel de riesgo (Anexo III): deshabilitado; no existen ResponseValues ni SurveyResults.ValorRespuesta en esta BD.
+        // d.Riesgo queda vacío y la gráfica correspondiente se oculta sola.
+        var wd = Where(false);
 
         // Anexo I: sólo agregados (dato sensible, no se listan personas)
-        var wd = Where(false);
         var qList = string.Join(",", Enumerable.Range(1, 6).Select(i => $"'question[{i}]'"));
         var a1 = await c.QuerySingleAsync<AnexoISummary>(
             $@"SELECT COUNT(DISTINCT CASE WHEN r.IdentificadorPregunta = 'question[1]'

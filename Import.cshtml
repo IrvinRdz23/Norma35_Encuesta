@@ -6,7 +6,7 @@
 </div>
 
 <form method="post" enctype="multipart/form-data" class="card-panel">
-    <div asp-validation-summary="All" class="alert alert-danger"></div>
+    <partial name="_Errors" />
 
     <h2 class="panel-title">Formato del archivo</h2>
     <ul class="text-muted">
@@ -17,7 +17,7 @@
     </ul>
 
     <label for="file" class="dropzone" id="drop">
-        <i class="bi bi-cloud-arrow-up"></i>
+        @Icons.Upload
         <span id="fileName">Elija un archivo .xlsx o arrástrelo aquí</span>
         <input id="file" name="file" type="file" accept=".xlsx" hidden />
     </label>

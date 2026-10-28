@@ -2,7 +2,7 @@
 @{ ViewData["Title"] = "Importación terminada"; }
 
 <section class="card-panel">
-    <h1 class="h3"><i class="bi bi-check-circle-fill done-icon sm"></i> Archivo importado</h1>
+    <h1 class="h3">@Icons.CheckCircleSmall Archivo importado</h1>
     <div class="kpis mt-3">
         <div class="kpi"><span class="kpi-v">@Model.Empleados.ToString("N0")</span><span class="kpi-l">Empleados procesados</span></div>
         <div class="kpi"><span class="kpi-v">@Model.Filas.ToString("N0")</span><span class="kpi-l">Respuestas guardadas</span></div>

@@ -69,6 +69,11 @@ public class SurveyController(
     public async Task<IActionResult> AnexoIII(AnexoIIIViewModel vm)
     {
         await LoadQuestionsAsync(vm);
+        if (vm.Questions.Count == 0)
+        {
+            ModelState.AddModelError("", "No hay preguntas cargadas para el Anexo III. Contacte a soporte.");
+            return View(vm);
+        }
         if (!await ResolveEmployeeAsync(vm)) return View(vm);
 
         var toSave = new List<(int, string, int)>();

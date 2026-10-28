@@ -43,7 +43,8 @@ public class ReportsController(
                 TempData["Error"] = "No se encontraron registros para generar el reporte.";
                 return RedirectToAction(nameof(Index));
             }
-            var bytes = excel.Build(dash, raw, filter);
+            var catalog = await repo.GetCatalogAsync();
+            var bytes = excel.Build(dash, raw, filter, catalog);
             var name = $"ReporteEncuestas_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
             return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", name);
         }
